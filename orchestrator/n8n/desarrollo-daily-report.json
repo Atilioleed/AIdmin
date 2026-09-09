@@ -1,0 +1,80 @@
+{
+  "name": "AIdmin - Desarrollo - Reporte diario",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Disparo diario 08:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 180]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Disparo manual (test)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 420]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:4100/run",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "trigger-agent",
+      "name": "Ejecutar agente Desarrollo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, run_id, summary, created_at\nFROM reports\nWHERE run_id = '{{ $json.runId }}'\nORDER BY created_at DESC\nLIMIT 1;"
+      },
+      "id": "confirm-report",
+      "name": "Confirmar reporte en DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [720, 300],
+      "credentials": {
+        "postgres": {
+          "id": "aidmin-postgres-credential",
+          "name": "AIdmin Postgres (local)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Disparo diario 08:00": {
+      "main": [[{ "node": "Ejecutar agente Desarrollo", "type": "main", "index": 0 }]]
+    },
+    "Disparo manual (test)": {
+      "main": [[{ "node": "Ejecutar agente Desarrollo", "type": "main", "index": 0 }]]
+    },
+    "Ejecutar agente Desarrollo": {
+      "main": [[{ "node": "Confirmar reporte en DB", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "aidmin-desarrollo-daily-report",
+  "meta": {
+    "instanceId": "aidmin-local"
+  }
+}
