@@ -10,7 +10,9 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # Postgres 18+ espera un unico mount en /var/lib/postgresql (no en .../data);
+      # el propio entrypoint crea la subcarpeta versionada adentro.
+      - postgres_data:/var/lib/postgresql
       - ./db/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:ro
       - ./db/seed.sql:/docker-entrypoint-initdb.d/2-seed.sql:ro
     healthcheck:

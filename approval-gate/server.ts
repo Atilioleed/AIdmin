@@ -1,6 +1,7 @@
 // Canal humano (seccion 3): endpoint HTTP simple para que Atilio vea approvals
 // pendientes y las apruebe/rechace. En un sprint posterior esto se reemplaza o se
 // complementa con WhatsApp Business; la logica de negocio (el gate) no cambia.
+import 'dotenv/config';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { getPool } from '../agents/_shared/db.js';
 import { ApprovalGate } from './index.js';

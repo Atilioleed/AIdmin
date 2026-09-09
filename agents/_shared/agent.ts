@@ -85,7 +85,10 @@ export class Agent {
       const textBlocks = response.content.filter(
         (block): block is Anthropic.TextBlock => block.type === 'text',
       );
-      const reasoning = textBlocks.map((block) => block.text).join('\n').trim();
+      const reasoning = textBlocks
+        .map((block) => block.text)
+        .join('\n')
+        .trim();
       const toolUseBlocks = response.content.filter(
         (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
       );
@@ -149,10 +152,9 @@ export class Agent {
   }
 
   private async getAgentId(): Promise<string> {
-    const result = await this.pool.query<{ id: string }>(
-      'SELECT id FROM agents WHERE slug = $1',
-      [this.config.slug],
-    );
+    const result = await this.pool.query<{ id: string }>('SELECT id FROM agents WHERE slug = $1', [
+      this.config.slug,
+    ]);
     const row = result.rows[0];
     if (!row) {
       throw new Error(
