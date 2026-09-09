@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev:desarrollo": "tsx agents/desarrollo/index.ts",
+    "dev:approval-gate": "tsx approval-gate/server.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
