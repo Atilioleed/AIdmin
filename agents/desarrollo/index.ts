@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { fileURLToPath } from 'node:url';
 import { Agent, type AgentRunResult } from '../_shared/agent.js';
+import { createLlmClient } from '../_shared/llm-client-factory.js';
 import { desarrolloTools } from './tools.js';
 
 const CONSTITUTION_PATH = fileURLToPath(new URL('./constitution.md', import.meta.url));
@@ -15,11 +16,14 @@ formato de tu constitucion.
 `.trim();
 
 export async function runDesarrolloAgent(): Promise<AgentRunResult> {
-  const agent = new Agent({
-    slug: 'desarrollo',
-    constitutionPath: CONSTITUTION_PATH,
-    tools: desarrolloTools,
-  });
+  const agent = new Agent(
+    {
+      slug: 'desarrollo',
+      constitutionPath: CONSTITUTION_PATH,
+      tools: desarrolloTools,
+    },
+    { anthropic: createLlmClient() },
+  );
 
   const result = await agent.run(DAILY_CHECK_CONTEXT);
 

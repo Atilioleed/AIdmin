@@ -39,6 +39,14 @@ ver [`docs/architecture.md`](docs/architecture.md) para la arquitectura completa
    Edita `.env` y como mínimo completa `ANTHROPIC_API_KEY`. Los demás valores tienen
    defaults razonables para desarrollo local.
 
+   > **Sin una key de Anthropic a mano?** `agents/_shared/llm-client-factory.ts` deja
+   > swapear temporalmente a cualquier endpoint compatible con OpenAI (Groq,
+   > OpenRouter, Gemini) seteando `LLM_PROVIDER=openai-compatible` +
+   > `LLM_BASE_URL`/`LLM_API_KEY`/`LLM_MODEL` en `.env` (ver comentarios en
+   > `.env.example`). Es solo para probar el flujo sin gastar en la API oficial; el
+   > default (`LLM_PROVIDER=anthropic` o la variable ausente) sigue usando el SDK
+   > oficial de Anthropic, que es lo que pide el stack del proyecto.
+
 3. **Levantar Postgres + n8n**
 
    ```bash
