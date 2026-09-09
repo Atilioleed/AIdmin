@@ -1,0 +1,102 @@
+{
+  "name": "AIdmin - Finanzas - Revision de flujo de caja",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Disparo diario 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 180]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Disparo manual (test)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 420]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:4101/run",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "trigger-agent",
+      "name": "Ejecutar agente Finanzas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, run_id, summary, created_at\nFROM reports\nWHERE run_id = '{{ $json.runId }}'\nORDER BY created_at DESC\nLIMIT 1;"
+      },
+      "id": "confirm-report",
+      "name": "Confirmar reporte en DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [720, 220],
+      "credentials": {
+        "postgres": {
+          "id": "aidmin-postgres-credential",
+          "name": "AIdmin Postgres (local)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, action_type, status, payload\nFROM approvals\nWHERE run_id = '{{ $json.runId }}'\nORDER BY requested_at DESC;"
+      },
+      "id": "list-approvals",
+      "name": "Ver approvals generados",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [720, 400],
+      "credentials": {
+        "postgres": {
+          "id": "aidmin-postgres-credential",
+          "name": "AIdmin Postgres (local)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Disparo diario 07:00": {
+      "main": [[{ "node": "Ejecutar agente Finanzas", "type": "main", "index": 0 }]]
+    },
+    "Disparo manual (test)": {
+      "main": [[{ "node": "Ejecutar agente Finanzas", "type": "main", "index": 0 }]]
+    },
+    "Ejecutar agente Finanzas": {
+      "main": [
+        [
+          { "node": "Confirmar reporte en DB", "type": "main", "index": 0 },
+          { "node": "Ver approvals generados", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "id": "aidmin-finanzas-cash-flow-review",
+  "meta": {
+    "instanceId": "aidmin-local"
+  }
+}

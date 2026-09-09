@@ -1,0 +1,18 @@
+{
+  "periodStart": "2026-09-01",
+  "periodEnd": "2026-09-09",
+  "openingBalanceClp": 4200000,
+  "income": [
+    { "date": "2026-09-03", "amountClp": 1200000, "source": "Ventas FIRMA IA - suscripciones" },
+    {
+      "date": "2026-09-07",
+      "amountClp": 450000,
+      "source": "Ventas FIRMA IA - documentos individuales"
+    }
+  ],
+  "expenses": [
+    { "date": "2026-09-05", "amountClp": 320000, "concept": "Honorarios contabilidad mensual" },
+    { "date": "2026-09-06", "amountClp": 90000, "concept": "Suscripcion herramientas SaaS" }
+  ],
+  "closingBalanceClp": 5440000
+}

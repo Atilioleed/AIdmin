@@ -1,7 +1,7 @@
 -- AIdmin - seed inicial
 -- Los 5 agentes de la arquitectura objetivo quedan registrados desde ya para que el
--- esquema los soporte sin retrabajo, pero solo 'desarrollo' esta activo en este sprint
--- (Fase 1). Los demas se activan en sprints posteriores, uno a la vez.
+-- esquema los soporte sin retrabajo. Se activan de a uno por sprint: 'desarrollo' y
+-- 'finanzas' ya estan construidos; marketing/producto/ceo siguen pendientes.
 
 INSERT INTO agents (slug, name, role_description, autonomy_level, is_active)
 VALUES
@@ -31,7 +31,7 @@ VALUES
     'Gerente de Finanzas',
     'Flujo de caja, conciliacion y cuentas por pagar.',
     'propose_only',
-    FALSE
+    TRUE
   ),
   (
     'producto',

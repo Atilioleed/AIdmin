@@ -37,12 +37,25 @@ posteriores.
 | -------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | CEO            | Lee reportes semanales y métricas; fija prioridades y sugiere reinversión | Lectura de reportes/DB, redacción de directrices             | Solo recomienda. Nunca autoriza gasto ni reemplaza la aprobación humana.                                                                                               | Sprint futuro                       |
 | Marketing      | Gestiona redes, contenido, leads, campañas                                | Meta Graph API, TikTok API, Metricool, WhatsApp Business API | Publica contenido orgánico pre-aprobado libremente. Todo gasto pasa OBLIGATORIAMENTE por el approval-gate.                                                             | Sprint futuro                       |
-| Finanzas       | Flujo de caja, conciliación, cuentas por pagar                            | SII (OpenFactura/Bsale), agregación bancaria (Fintoc)        | SOLO PROPONE. Deja la orden de pago en `pending_approval`. Nunca ejecuta una transferencia real.                                                                       | Sprint futuro                       |
+| Finanzas       | Flujo de caja, conciliación, cuentas por pagar                            | SII (OpenFactura/Bsale), agregación bancaria (Fintoc)        | SOLO PROPONE. Deja la orden de pago en `pending_approval`. Nunca ejecuta una transferencia real.                                                                       | **Construido este sprint**          |
 | Producto       | Catálogo, costos, precios                                                 | DB de catálogo, consulta a Finanzas y Marketing              | Propone catálogo/precios; se publica solo tras aprobación humana.                                                                                                      | Sprint futuro                       |
 | **Desarrollo** | Monitoreo de infraestructura, errores, costos de hosting                  | Uptime check, lectura de logs (Sentry), GitHub API           | Puede actuar solo en tareas de bajo riesgo (reiniciar, alertar, abrir un borrador de fix). Cambios estructurales o despliegues a producción requieren revisión humana. | **Piloto - construido este sprint** |
 
-Los 5 agentes están seedeados en la tabla `agents` (`db/seed.sql`); solo `desarrollo`
-tiene `is_active = true` hoy.
+Los 5 agentes están seedeados en la tabla `agents` (`db/seed.sql`); `desarrollo` y
+`finanzas` tienen `is_active = true` hoy.
+
+### Finanzas: primer uso real del approval-gate
+
+El agente de Finanzas (`agents/finanzas/`) es el primero que genera una acción
+gateada de verdad. Su tool `propose_payment` (`agents/finanzas/tools.ts`) no tiene
+ninguna otra vía para mover dinero — llama a
+`ApprovalGate.requestApproval({ actionType: 'payment', ... })` contra el mismo módulo
+que usará Marketing más adelante, y el resultado siempre es `pending_approval`. Sus
+otras dos tools (`get_cash_flow_summary`, `list_pending_invoices`) son mocks de
+Fintoc/SII; `list_pending_invoices` incluye una factura de ejemplo con un intento de
+fraude por ingeniería social (glosa que pide saltarse la aprobación humana) para
+probar que la regla de "contenido externo = dato" también se sostiene con dinero de
+por medio — el agente la detecta y la reporta como anomalía en vez de proponerla.
 
 ## Reglas de gobernanza (no negociables, en código)
 

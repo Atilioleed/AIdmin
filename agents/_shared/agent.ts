@@ -5,6 +5,11 @@ import type { Pool } from 'pg';
 import { getPool } from './db.js';
 import type { AgentSlug, DecisionType } from './types.js';
 
+export interface AgentToolContext {
+  agentId: string;
+  runId: string;
+}
+
 export interface AgentTool<TInput = Record<string, unknown>> {
   name: string;
   description: string;
@@ -13,7 +18,9 @@ export interface AgentTool<TInput = Record<string, unknown>> {
   // volver al modelo. Si el resultado incluye texto de una fuente externa (un log, el
   // body de una respuesta HTTP, etc.), la tool debe envolverlo con
   // asUntrustedContent() antes de retornarlo - ver agents/_shared/untrusted-content.ts.
-  execute: (input: TInput) => Promise<unknown>;
+  // `context` trae el agentId/runId de la corrida actual - lo necesitan tools que a su
+  // vez escriben en otra tabla con atribucion propia (p.ej. approval-gate).
+  execute: (input: TInput, context: AgentToolContext) => Promise<unknown>;
 }
 
 export interface AgentConfig {
@@ -112,7 +119,10 @@ export class Agent {
           isError = true;
         } else {
           try {
-            output = await tool.execute(toolUseBlock.input as Record<string, unknown>);
+            output = await tool.execute(toolUseBlock.input as Record<string, unknown>, {
+              agentId,
+              runId,
+            });
           } catch (error) {
             output = { error: error instanceof Error ? error.message : String(error) };
             isError = true;
