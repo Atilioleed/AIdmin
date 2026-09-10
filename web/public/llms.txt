@@ -1,0 +1,37 @@
+# AIdmin
+
+> AIdmin es una plataforma que le da a cada pyme seis gerentes de inteligencia
+> artificial — marketing, finanzas, producto, legal, desarrollo y un CEO que
+> preside el comité — que investigan, preparan y proponen trabajo todos los días.
+> Cualquier gasto real o publicación pública queda pendiente de aprobación
+> humana explícita: AIdmin nunca ejecuta una transferencia ni publica contenido
+> por su cuenta.
+
+## Qué es
+
+AIdmin no reemplaza al dueño de la pyme ni a su equipo: automatiza el trabajo
+repetitivo (investigación de mercado y competencia, contenido para redes,
+seguimiento de flujo de caja, redacción de documentos legales, mantención de
+sitio/producto digital) y deja cada decisión sensible en manos de una persona.
+
+## Para quién es
+
+Pymes chilenas que venden producto o servicio y no tienen (o no pueden pagar)
+un equipo propio de marketing, finanzas o legal, pero quieren verse y operar
+de forma profesional.
+
+## Precios
+
+Planes desde $169.900 CLP/mes. Piloto (3 gerentes a elección), Completo (6
+gerentes con comité diario), Agencia (multi-pyme desde un solo panel).
+
+## Páginas
+
+- [Sitio principal](https://aidmin.cl/): qué es AIdmin, cómo funciona, gerentes
+  disponibles, precios y preguntas frecuentes.
+- Los sitios públicos de cada pyme cliente viven en `/sitio/<slug>` y son
+  negocios independientes (no forman parte de AIdmin como empresa).
+
+## Contacto
+
+hola@aidmin.cl · +56 9 4266 8165

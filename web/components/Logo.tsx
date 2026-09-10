@@ -26,11 +26,35 @@ export function Logo({
       </defs>
       <rect x="1.5" y="1.5" width="37" height="37" rx="11" fill="url(#aidmin-mark)" />
       <rect x="1.5" y="1.5" width="37" height="37" rx="11" stroke="white" strokeOpacity="0.25" />
-      <path
-        d="M13 27L18.2 13H21.8L27 27H23.6L22.5 23.9H17.5L16.4 27H13ZM18.4 21.3H21.6L20 16.7L18.4 21.3Z"
-        fill="white"
-      />
-      <circle cx="29.5" cy="12" r="2.4" fill="white" fillOpacity="0.92" />
+      {/* Marca: un cerebro hecho de nodos conectados - la misma idea de "red de
+          agentes siempre conectados" de components/AgentNetworkVisual.tsx, en
+          miniatura. No es un cerebro anatomico ni un icono de stock: es la forma
+          propia del producto. */}
+      <g stroke="white" strokeOpacity="0.55" strokeWidth="1.1" strokeLinecap="round">
+        <line x1="20" y1="9" x2="27" y2="12.5" />
+        <line x1="27" y1="12.5" x2="30" y2="20" />
+        <line x1="30" y1="20" x2="25.5" y2="27.5" />
+        <line x1="25.5" y1="27.5" x2="20" y2="30" />
+        <line x1="20" y1="30" x2="14.5" y2="27.5" />
+        <line x1="14.5" y1="27.5" x2="10" y2="20" />
+        <line x1="10" y1="20" x2="13" y2="12.5" />
+        <line x1="13" y1="12.5" x2="20" y2="9" />
+        <line x1="20" y1="20" x2="20" y2="9" />
+        <line x1="20" y1="20" x2="30" y2="20" />
+        <line x1="20" y1="20" x2="20" y2="30" />
+        <line x1="20" y1="20" x2="10" y2="20" />
+      </g>
+      <g fill="white">
+        <circle cx="20" cy="20" r="2.6" fillOpacity="0.95" />
+        <circle cx="20" cy="9" r="1.7" fillOpacity="0.85" />
+        <circle cx="27" cy="12.5" r="1.5" fillOpacity="0.75" />
+        <circle cx="30" cy="20" r="1.7" fillOpacity="0.85" />
+        <circle cx="25.5" cy="27.5" r="1.5" fillOpacity="0.75" />
+        <circle cx="20" cy="30" r="1.7" fillOpacity="0.85" />
+        <circle cx="14.5" cy="27.5" r="1.5" fillOpacity="0.75" />
+        <circle cx="10" cy="20" r="1.7" fillOpacity="0.85" />
+        <circle cx="13" cy="12.5" r="1.5" fillOpacity="0.75" />
+      </g>
     </svg>
   );
 

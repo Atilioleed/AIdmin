@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import { UserButton } from '@clerk/nextjs';
+
+export const metadata: Metadata = {
+  title: 'Sin pyme asociada',
+  robots: { index: false, follow: false },
+};
 
 export default function SinPymePage() {
   return (

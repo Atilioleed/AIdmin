@@ -70,6 +70,17 @@ export async function getPublishedTenantWebsiteBySlug(
   return { tenantId: row.tenant_id, tenantName: row.tenant_name, website: toTenantWebsite(row) };
 }
 
+/** Para app/sitemap.ts - un slug + fecha por cada sitio publico ya publicado. */
+export async function listPublishedTenantSlugs(): Promise<{ slug: string; updatedAt: Date }[]> {
+  const result = await getPool().query<{ slug: string; updated_at: Date }>(
+    `SELECT t.slug, tw.updated_at
+     FROM tenant_websites tw
+     JOIN tenants t ON t.id = tw.tenant_id
+     WHERE tw.published = TRUE AND t.slug IS NOT NULL`,
+  );
+  return result.rows.map((row) => ({ slug: row.slug, updatedAt: row.updated_at }));
+}
+
 export interface TenantWebsiteInput {
   templateSlug: string;
   businessNameOverride: string;

@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import { UserButton } from '@clerk/nextjs';
+
+export const metadata: Metadata = {
+  title: 'Sin autorización',
+  robots: { index: false, follow: false },
+};
 
 export default function NoAutorizadoPage() {
   return (

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Reveal } from './Reveal';
+import { ShareButton } from './ShareButton';
 
 export function FinalCta() {
   return (
@@ -58,6 +59,7 @@ export function FinalCta() {
                 </svg>
                 +56 9 4266 8165
               </a>
+              <ShareButton />
             </div>
           </div>
         </div>

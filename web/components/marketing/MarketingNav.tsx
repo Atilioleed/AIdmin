@@ -2,9 +2,12 @@ import Link from 'next/link';
 import { Logo } from '../Logo';
 
 const LINKS = [
+  { href: '#que-es', label: 'Qué es' },
   { href: '#gerentes', label: 'Gerentes IA' },
   { href: '#como-funciona', label: 'Cómo funciona' },
   { href: '#precios', label: 'Precios' },
+  { href: '#faq', label: 'Preguntas' },
+  { href: '#nosotros', label: 'Nosotros' },
 ];
 
 export function MarketingNav() {

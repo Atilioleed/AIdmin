@@ -1,10 +1,20 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
+import { GoogleAnalytics } from "../components/GoogleAnalytics";
 import "./globals.css";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "AIdmin",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "AIdmin — Gerentes de inteligencia artificial para pymes",
+    template: "%s · AIdmin",
+  },
   description: "Panel de gestion de AIdmin para pymes",
+  ...(process.env.GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -22,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </head>
         <body className="min-h-full flex flex-col bg-[var(--color-surface-sunken)] text-[var(--color-ink)] font-sans">
           {children}
+          <GoogleAnalytics />
         </body>
       </html>
     </ClerkProvider>
