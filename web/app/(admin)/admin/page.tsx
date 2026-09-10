@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { listTenants } from '../../../lib/tenant';
+import { listAgentActivityAcrossTenants } from '../../../lib/queries';
 import { PLAN_PRICES_CLP, PLAN_LABELS } from '../../../lib/plans';
 import { AnimatedNumber } from '../../../components/AnimatedNumber';
+import { AgentNetworkVisual } from '../../../components/AgentNetworkVisual';
+import type { AgentKey } from '../../../components/marketing/AgentIcon';
 
 const STAT_ACCENTS = [
   { icon: 'coin', bg: 'var(--gradient-warm)' },
@@ -40,6 +43,7 @@ export default async function AdminOverviewPage() {
   const active = tenants.filter((t) => t.status === 'active');
   const revenue = active.reduce((sum, t) => sum + PLAN_PRICES_CLP[t.plan], 0);
   const recent = [...tenants].sort((a, b) => +b.createdAt - +a.createdAt).slice(0, 5);
+  const activity = await listAgentActivityAcrossTenants();
 
   const stats = [
     { label: 'Ingresos mensuales (calculado)', value: revenue, format: 'clp' as const },
@@ -58,6 +62,12 @@ export default async function AdminOverviewPage() {
           conectada todavía (decisión explícita del sprint).
         </p>
       </div>
+
+      <AgentNetworkVisual
+        title="Tu comité, trabajando ahora"
+        subtitle="Los 6 gerentes siguen conectados y alimentándose entre sí, en todas las pymes — esto refleja actividad real, no una animación de mentira."
+        activity={activity.map((a) => ({ agentSlug: a.slug as AgentKey, lastActiveAt: a.lastActiveAt }))}
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {stats.map((s, i) => (

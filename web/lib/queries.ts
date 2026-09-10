@@ -35,6 +35,61 @@ export interface ClientUploadRow {
   createdAt: Date;
 }
 
+export interface AgentActivityRow {
+  slug: string;
+  name: string;
+  isActive: boolean;
+  lastActiveAt: Date | null;
+}
+
+/**
+ * Ultima actividad (ultimo reporte) de cada agente de este tenant, para paneles
+ * de "red de agentes" en vivo (ver components/AgentNetworkVisual.tsx). LEFT JOIN
+ * a proposito: un agente sin reportes todavia igual aparece, con lastActiveAt null.
+ */
+export async function listAgentActivity(tenantId: string): Promise<AgentActivityRow[]> {
+  const result = await getPool().query(
+    `SELECT a.slug, a.name, a.is_active, MAX(r.created_at) AS last_active_at
+     FROM agents a
+     LEFT JOIN reports r ON r.agent_id = a.id
+     WHERE a.tenant_id = $1
+     GROUP BY a.slug, a.name, a.is_active
+     ORDER BY a.slug`,
+    [tenantId],
+  );
+  return (
+    result.rows as Array<{ slug: string; name: string; is_active: boolean; last_active_at: Date | null }>
+  ).map((row) => ({
+    slug: row.slug,
+    name: row.name,
+    isActive: row.is_active,
+    lastActiveAt: row.last_active_at,
+  }));
+}
+
+/**
+ * Igual que listAgentActivity pero a través de todas las pymes — vista de
+ * plataforma para /admin (ver components/AgentNetworkVisual.tsx). Un slug de
+ * agente se marca "activo" si CUALQUIER pyme le sacó un reporte reciente.
+ */
+export async function listAgentActivityAcrossTenants(): Promise<AgentActivityRow[]> {
+  const result = await getPool().query(
+    `SELECT a.slug, MIN(a.name) AS name, bool_or(a.is_active) AS is_active, MAX(r.created_at) AS last_active_at
+     FROM agents a
+     LEFT JOIN reports r ON r.agent_id = a.id
+     GROUP BY a.slug
+     ORDER BY a.slug`,
+  );
+  return (
+    result.rows as Array<{ slug: string; name: string; is_active: boolean; last_active_at: Date | null }>
+  ).map((row) => ({
+    slug: row.slug,
+    name: row.name,
+    isActive: row.is_active,
+    lastActiveAt: row.last_active_at,
+  }));
+}
+
 export async function getLatestReport(tenantId: string, slug: string): Promise<ReportRow | null> {
   const result = await getPool().query(
     `SELECT r.id, a.slug, a.name AS agent_name, r.summary, r.created_at

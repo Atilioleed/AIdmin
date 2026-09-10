@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AGENTS, AgentIcon } from './AgentIcon';
+import { AgentNetworkVisual } from '../AgentNetworkVisual';
 
 export function Hero() {
   return (
@@ -41,19 +41,8 @@ export function Hero() {
           </p>
         </div>
 
-        <div className="relative mx-auto grid w-full max-w-sm grid-cols-2 gap-4 sm:grid-cols-3">
-          {AGENTS.map((agent, i) => (
-            <div
-              key={agent.key}
-              className="animate-float flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-center backdrop-blur-sm"
-              style={{ animationDelay: `${i * 0.35}s` }}
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-gold)]" style={{ background: 'rgba(247, 188, 69, 0.14)' }}>
-                <AgentIcon agent={agent.key} />
-              </span>
-              <span className="text-[11px] font-semibold leading-tight text-white/85">{agent.name}</span>
-            </div>
-          ))}
+        <div className="relative mx-auto w-full max-w-lg">
+          <AgentNetworkVisual compact />
         </div>
       </div>
     </section>

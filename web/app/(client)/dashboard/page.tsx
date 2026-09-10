@@ -1,16 +1,26 @@
 import { redirect } from 'next/navigation';
 import { getCurrentTenant } from '../../../lib/tenant';
-import { getLatestReport } from '../../../lib/queries';
+import { getLatestReport, listAgentActivity } from '../../../lib/queries';
 import { OnboardingChecklist } from './OnboardingChecklist';
+import { AgentNetworkVisual } from '../../../components/AgentNetworkVisual';
+import type { AgentKey } from '../../../components/marketing/AgentIcon';
 
 export default async function DashboardPage() {
   const tenant = await getCurrentTenant();
   if (!tenant) redirect('/sin-pyme');
 
-  const pauta = await getLatestReport(tenant.id, 'ceo');
+  const [pauta, activity] = await Promise.all([
+    getLatestReport(tenant.id, 'ceo'),
+    listAgentActivity(tenant.id),
+  ]);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
+      <AgentNetworkVisual
+        title="Tu comité, trabajando ahora"
+        subtitle="Los 6 gerentes de IA de tu pyme siguen conectados, se pasan información entre sí y nunca se detienen — esto es actividad real, no decoración."
+        activity={activity.map((a) => ({ agentSlug: a.slug as AgentKey, lastActiveAt: a.lastActiveAt }))}
+      />
       <OnboardingChecklist tenantId={tenant.id} />
       <h1 className="text-lg font-semibold text-neutral-900">Pauta de comité</h1>
       {!pauta ? (
