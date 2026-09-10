@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import type { Pool } from 'pg';
 import type { AgentTool } from '../_shared/agent.js';
+import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
+import { getPool } from '../_shared/db.js';
 
 const DOCUMENT_TEMPLATES_PATH = fileURLToPath(
   new URL('./sample-data/document-templates.json', import.meta.url),
@@ -79,8 +82,11 @@ function toGenericTool<TInput>(tool: AgentTool<TInput>): AgentTool {
   return tool as unknown as AgentTool;
 }
 
-export const legalTools: AgentTool[] = [
-  toGenericTool(listDocumentTemplatesTool),
-  toGenericTool(getLegalReferenceChecklistTool),
-  toGenericTool(flagDocumentForLegalReviewTool),
-];
+export function createLegalTools(tenantId: string, pool: Pool = getPool()): AgentTool[] {
+  return [
+    toGenericTool(listDocumentTemplatesTool),
+    toGenericTool(getLegalReferenceChecklistTool),
+    toGenericTool(flagDocumentForLegalReviewTool),
+    createGetBusinessContextTool(tenantId, pool),
+  ];
+}

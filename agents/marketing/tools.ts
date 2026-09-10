@@ -1,11 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import type { Pool } from 'pg';
 import { ApprovalGate } from '../../approval-gate/index.js';
 import { PgApprovalsRepository } from '../../approval-gate/pg-approvals-repository.js';
 import { ContentGate } from '../../content-gate/index.js';
 import { PgContentReviewsRepository } from '../../content-gate/pg-content-reviews-repository.js';
 import type { AgentTool } from '../_shared/agent.js';
+import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
+import { createGetSocialLinksTool } from '../_shared/social-links-tool.js';
 import {
   asUntrustedContent,
   formatUntrustedContentForPrompt,
@@ -213,8 +216,10 @@ function toGenericTool<TInput>(tool: AgentTool<TInput>): AgentTool {
 }
 
 export function createMarketingTools(
+  tenantId: string,
   approvalGate: ApprovalGate = new ApprovalGate(new PgApprovalsRepository(getPool())),
   contentGate: ContentGate = new ContentGate(new PgContentReviewsRepository(getPool())),
+  pool: Pool = getPool(),
 ): AgentTool[] {
   return [
     toGenericTool(getContentCalendarTool),
@@ -223,5 +228,7 @@ export function createMarketingTools(
     toGenericTool(buildProposePostTool(contentGate)),
     toGenericTool(buildProposePaidCampaignTool(approvalGate)),
     toGenericTool(buildProposeBudgetChangeTool(approvalGate)),
+    createGetBusinessContextTool(tenantId, pool),
+    createGetSocialLinksTool(tenantId, pool),
   ];
 }

@@ -1,5 +1,6 @@
 import type { Pool } from 'pg';
 import type { AgentTool } from '../_shared/agent.js';
+import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
 
 interface RecentReportRow {
@@ -71,5 +72,6 @@ export function createCeoTools(tenantId: string, pool: Pool = getPool()): AgentT
   return [
     buildListRecentReportsTool(tenantId, pool),
     buildListPendingApprovalsTool(tenantId, pool),
+    createGetBusinessContextTool(tenantId, pool),
   ];
 }

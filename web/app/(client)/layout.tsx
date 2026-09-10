@@ -4,6 +4,8 @@ import { getCurrentTenant } from '../../lib/tenant';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Comité' },
+  { href: '/dashboard/negocio', label: 'Negocio' },
+  { href: '/dashboard/redes', label: 'Redes' },
   { href: '/dashboard/approvals', label: 'Aprobaciones' },
   { href: '/dashboard/content', label: 'Contenido' },
   { href: '/dashboard/uploads', label: 'Archivos' },

@@ -1,3 +1,4 @@
+import type { Pool } from 'pg';
 import { describe, expect, it } from 'vitest';
 import { ApprovalGate } from '../../approval-gate/index.js';
 import type { ApprovalRecord, ApprovalsRepository } from '../../approval-gate/types.js';
@@ -5,6 +6,10 @@ import { ContentGate } from '../../content-gate/index.js';
 import type { ContentReviewRecord, ContentReviewsRepository } from '../../content-gate/types.js';
 import type { AgentTool, AgentToolContext } from '../_shared/agent.js';
 import { createMarketingTools } from './tools.js';
+
+// get_business_context/get_social_links no se ejercitan en estos tests (solo se
+// construyen), pero createMarketingTools igual necesita un Pool para armarlas.
+const fakePool = { query: () => Promise.reject(new Error('not used in this test')) } as unknown as Pool;
 
 function createInMemoryApprovalsRepository(): ApprovalsRepository & { records: ApprovalRecord[] } {
   const records: ApprovalRecord[] = [];
@@ -89,7 +94,7 @@ describe('Marketing propose_post tool', () => {
     const approvalGate = new ApprovalGate(approvalRepo);
     const context: AgentToolContext = { agentId: 'agent-marketing-1', runId: 'run-1' };
 
-    const tool = getTool(createMarketingTools(approvalGate, contentGate), 'propose_post');
+    const tool = getTool(createMarketingTools('tenant-test-1', approvalGate, contentGate, fakePool), 'propose_post');
     const result = (await tool.execute(
       { channel: 'instagram', contentText: 'Post de prueba' },
       context,
@@ -110,7 +115,7 @@ describe('Marketing propose_paid_campaign tool', () => {
     const approvalGate = new ApprovalGate(approvalRepo);
     const context: AgentToolContext = { agentId: 'agent-marketing-1', runId: 'run-1' };
 
-    const tool = getTool(createMarketingTools(approvalGate, contentGate), 'propose_paid_campaign');
+    const tool = getTool(createMarketingTools('tenant-test-1', approvalGate, contentGate, fakePool), 'propose_paid_campaign');
     const result = (await tool.execute(
       {
         campaignName: 'Lanzamiento Ley 21.719',
@@ -136,7 +141,7 @@ describe('Marketing propose_budget_change tool', () => {
     const approvalGate = new ApprovalGate(approvalRepo);
     const context: AgentToolContext = { agentId: 'agent-marketing-1', runId: 'run-1' };
 
-    const tool = getTool(createMarketingTools(approvalGate, contentGate), 'propose_budget_change');
+    const tool = getTool(createMarketingTools('tenant-test-1', approvalGate, contentGate, fakePool), 'propose_budget_change');
     const result = (await tool.execute(
       {
         campaignName: 'Campaña activa',

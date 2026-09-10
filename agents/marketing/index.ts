@@ -19,12 +19,13 @@ ejecutes nada tu misma. Termina con tu reporte segun el formato de tu constituci
 `.trim();
 
 export async function runMarketingAgent(tenantId?: string): Promise<AgentRunResult> {
+  const resolvedTenantId = resolveTenantId(tenantId);
   const agent = new Agent(
     {
-      tenantId: resolveTenantId(tenantId),
+      tenantId: resolvedTenantId,
       slug: 'marketing',
       constitutionPath: CONSTITUTION_PATH,
-      tools: createMarketingTools(),
+      tools: createMarketingTools(resolvedTenantId),
     },
     { anthropic: createLlmClient() },
   );

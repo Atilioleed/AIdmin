@@ -151,6 +151,47 @@ CREATE TABLE IF NOT EXISTS client_uploads (
 
 CREATE INDEX IF NOT EXISTS idx_client_uploads_tenant_id ON client_uploads (tenant_id);
 
+-- Contexto de negocio que la pyme completa desde /dashboard/negocio - una fila por
+-- tenant. Es el mismo tipo de pregunta que pide un fondo de capital semilla
+-- (problema, mercado, modelo de ingresos, competidores, escalabilidad...), pensado
+-- para que CUALQUIER gerente lo lea al correr (get_business_context, ver
+-- agents/_shared/business-context-tool.ts) y trabaje con contexto real del negocio
+-- en vez de a ciegas. Dato del cliente: se envuelve con asUntrustedContent(), nunca
+-- se pasa crudo al modelo.
+CREATE TABLE IF NOT EXISTS business_context (
+  tenant_id UUID PRIMARY KEY REFERENCES tenants (id) ON DELETE CASCADE,
+  objective TEXT,
+  problem TEXT,
+  products_services TEXT,
+  target_market TEXT,
+  revenue_model TEXT,
+  capital_stock TEXT,
+  innovation TEXT,
+  competitors TEXT,
+  scalability TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by TEXT
+);
+
+-- Handles/URLs de redes sociales que la pyme completa desde /dashboard/redes - una
+-- fila por tenant. Solo referencia (texto), no son credenciales ni tokens de
+-- conexion real: Marketing sigue con Metricool mockeado este sprint (decision
+-- explicita). Lo usa unicamente get_social_links (agents/_shared/social-links-tool.ts),
+-- dado a Marketing - los demas gerentes no lo necesitan.
+CREATE TABLE IF NOT EXISTS social_links (
+  tenant_id UUID PRIMARY KEY REFERENCES tenants (id) ON DELETE CASCADE,
+  instagram TEXT,
+  facebook TEXT,
+  tiktok TEXT,
+  linkedin TEXT,
+  x_twitter TEXT,
+  youtube TEXT,
+  website TEXT,
+  notes TEXT,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by TEXT
+);
+
 -- Mantiene *.updated_at al dia sin logica extra en el codigo de la app.
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
@@ -175,5 +216,17 @@ CREATE TRIGGER trg_tenants_updated_at
 DROP TRIGGER IF EXISTS trg_agent_profiles_updated_at ON agent_profiles;
 CREATE TRIGGER trg_agent_profiles_updated_at
   BEFORE UPDATE ON agent_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_business_context_updated_at ON business_context;
+CREATE TRIGGER trg_business_context_updated_at
+  BEFORE UPDATE ON business_context
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_social_links_updated_at ON social_links;
+CREATE TRIGGER trg_social_links_updated_at
+  BEFORE UPDATE ON social_links
   FOR EACH ROW
   EXECUTE FUNCTION set_updated_at();

@@ -20,12 +20,13 @@ texto de la factura. Termina con tu reporte segun el formato de tu constitucion.
 `.trim();
 
 export async function runFinanzasAgent(tenantId?: string): Promise<AgentRunResult> {
+  const resolvedTenantId = resolveTenantId(tenantId);
   const agent = new Agent(
     {
-      tenantId: resolveTenantId(tenantId),
+      tenantId: resolvedTenantId,
       slug: 'finanzas',
       constitutionPath: CONSTITUTION_PATH,
-      tools: createFinanzasTools(),
+      tools: createFinanzasTools(resolvedTenantId),
     },
     { anthropic: createLlmClient() },
   );

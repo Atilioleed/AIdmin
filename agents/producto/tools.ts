@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import type { Pool } from 'pg';
 import type { AgentTool } from '../_shared/agent.js';
+import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
+import { getPool } from '../_shared/db.js';
 import {
   asUntrustedContent,
   formatUntrustedContentForPrompt,
@@ -105,8 +108,11 @@ function toGenericTool<TInput>(tool: AgentTool<TInput>): AgentTool {
   return tool as unknown as AgentTool;
 }
 
-export const productoTools: AgentTool[] = [
-  toGenericTool(searchMarketTool),
-  toGenericTool(listCurrentCatalogTool),
-  toGenericTool(proposeImprovementTool),
-];
+export function createProductoTools(tenantId: string, pool: Pool = getPool()): AgentTool[] {
+  return [
+    toGenericTool(searchMarketTool),
+    toGenericTool(listCurrentCatalogTool),
+    toGenericTool(proposeImprovementTool),
+    createGetBusinessContextTool(tenantId, pool),
+  ];
+}

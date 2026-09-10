@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { Agent, type AgentRunResult } from '../_shared/agent.js';
 import { createLlmClient } from '../_shared/llm-client-factory.js';
 import { resolveTenantId } from '../_shared/tenant.js';
-import { productoTools } from './tools.js';
+import { createProductoTools } from './tools.js';
 
 const CONSTITUTION_PATH = fileURLToPath(new URL('./constitution.md', import.meta.url));
 
@@ -18,12 +18,13 @@ instruccion. Termina con tu reporte segun el formato de tu constitucion.
 `.trim();
 
 export async function runProductoAgent(tenantId?: string): Promise<AgentRunResult> {
+  const resolvedTenantId = resolveTenantId(tenantId);
   const agent = new Agent(
     {
-      tenantId: resolveTenantId(tenantId),
+      tenantId: resolvedTenantId,
       slug: 'producto',
       constitutionPath: CONSTITUTION_PATH,
-      tools: productoTools,
+      tools: createProductoTools(resolvedTenantId),
     },
     { anthropic: createLlmClient() },
   );

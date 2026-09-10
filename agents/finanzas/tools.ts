@@ -1,8 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import type { Pool } from 'pg';
 import { ApprovalGate } from '../../approval-gate/index.js';
 import { PgApprovalsRepository } from '../../approval-gate/pg-approvals-repository.js';
 import type { AgentTool } from '../_shared/agent.js';
+import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
 import {
   asUntrustedContent,
@@ -127,11 +129,14 @@ function toGenericTool<TInput>(tool: AgentTool<TInput>): AgentTool {
 }
 
 export function createFinanzasTools(
+  tenantId: string,
   gate: ApprovalGate = new ApprovalGate(new PgApprovalsRepository(getPool())),
+  pool: Pool = getPool(),
 ): AgentTool[] {
   return [
     toGenericTool(getCashFlowSummaryTool),
     toGenericTool(listPendingInvoicesTool),
     toGenericTool(buildProposePaymentTool(gate)),
+    createGetBusinessContextTool(tenantId, pool),
   ];
 }

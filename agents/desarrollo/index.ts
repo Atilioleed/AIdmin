@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { Agent, type AgentRunResult } from '../_shared/agent.js';
 import { createLlmClient } from '../_shared/llm-client-factory.js';
 import { resolveTenantId } from '../_shared/tenant.js';
-import { desarrolloTools } from './tools.js';
+import { createDesarrolloTools } from './tools.js';
 
 const CONSTITUTION_PATH = fileURLToPath(new URL('./constitution.md', import.meta.url));
 
@@ -17,12 +17,13 @@ formato de tu constitucion.
 `.trim();
 
 export async function runDesarrolloAgent(tenantId?: string): Promise<AgentRunResult> {
+  const resolvedTenantId = resolveTenantId(tenantId);
   const agent = new Agent(
     {
-      tenantId: resolveTenantId(tenantId),
+      tenantId: resolvedTenantId,
       slug: 'desarrollo',
       constitutionPath: CONSTITUTION_PATH,
-      tools: desarrolloTools,
+      tools: createDesarrolloTools(resolvedTenantId),
     },
     { anthropic: createLlmClient() },
   );

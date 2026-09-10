@@ -1,8 +1,13 @@
+import type { Pool } from 'pg';
 import { describe, expect, it, vi } from 'vitest';
 import { ApprovalGate } from '../../approval-gate/index.js';
 import type { ApprovalRecord, ApprovalsRepository } from '../../approval-gate/types.js';
 import type { AgentTool, AgentToolContext } from '../_shared/agent.js';
 import { createFinanzasTools } from './tools.js';
+
+// get_business_context no se ejercita en estos tests (solo se construye), pero
+// createFinanzasTools igual necesita un Pool para armarla.
+const fakePool = { query: () => Promise.reject(new Error('not used in this test')) } as unknown as Pool;
 
 // Mismo patron que approval-gate.test.ts: un repositorio en memoria para no depender
 // de una Postgres real en este test.
@@ -52,7 +57,7 @@ describe('Finanzas propose_payment tool', () => {
   it('siempre deja la propuesta en pending_approval via el approval-gate real', async () => {
     const repo = createInMemoryRepository();
     const gate = new ApprovalGate(repo);
-    const tool = getProposePaymentTool(createFinanzasTools(gate));
+    const tool = getProposePaymentTool(createFinanzasTools('tenant-test-1', gate, fakePool));
 
     const result = (await tool.execute(
       {
@@ -76,7 +81,7 @@ describe('Finanzas propose_payment tool', () => {
     const repo = createInMemoryRepository();
     const gate = new ApprovalGate(repo);
     const requestApprovalSpy = vi.spyOn(gate, 'requestApproval');
-    const tool = getProposePaymentTool(createFinanzasTools(gate));
+    const tool = getProposePaymentTool(createFinanzasTools('tenant-test-1', gate, fakePool));
 
     await tool.execute(
       {
