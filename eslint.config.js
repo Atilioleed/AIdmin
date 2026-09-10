@@ -6,7 +6,7 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 export default tseslint.config(
   eslint.configs.recommended,
   {
-    files: ['agents/**/*.ts', 'approval-gate/**/*.ts', 'db/**/*.ts'],
+    files: ['agents/**/*.ts', 'approval-gate/**/*.ts', 'content-gate/**/*.ts', 'db/**/*.ts'],
     extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parserOptions: {

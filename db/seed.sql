@@ -23,9 +23,9 @@ VALUES
   (
     'marketing',
     'Gerente de Marketing',
-    'Gestiona redes, contenido, leads y campanas.',
+    'Gestiona redes, contenido y campanas via Metricool (100% publicidad/redes, sin research de mercado). Contenido organico pasa por content-gate, gasto por approval-gate.',
     'act_with_gate',
-    FALSE
+    TRUE
   ),
   (
     'finanzas',

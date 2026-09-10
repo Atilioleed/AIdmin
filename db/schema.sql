@@ -58,6 +58,29 @@ CREATE TABLE IF NOT EXISTS approvals (
 CREATE INDEX IF NOT EXISTS idx_approvals_status ON approvals (status);
 CREATE INDEX IF NOT EXISTS idx_approvals_agent_id ON approvals (agent_id);
 
+-- Analogo a `approvals` pero para la otra cosa irreversible que la seccion 1 del
+-- proyecto marca como no-negociable: marca publica. Todo contenido organico que un
+-- agente quiera publicar en redes reales pasa por aqui primero (content-gate),
+-- separado del approval-gate porque es un riesgo distinto al dinero.
+CREATE TABLE IF NOT EXISTS content_reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  agent_id UUID NOT NULL REFERENCES agents (id) ON DELETE CASCADE,
+  run_id UUID,
+  channel TEXT NOT NULL,
+  content_text TEXT NOT NULL,
+  scheduled_for TIMESTAMPTZ,
+  status TEXT NOT NULL DEFAULT 'pending_review' CHECK (
+    status IN ('pending_review', 'approved', 'rejected')
+  ),
+  requested_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  resolved_at TIMESTAMPTZ,
+  resolved_by TEXT,
+  resolution_notes TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_content_reviews_status ON content_reviews (status);
+CREATE INDEX IF NOT EXISTS idx_content_reviews_agent_id ON content_reviews (agent_id);
+
 CREATE TABLE IF NOT EXISTS reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   agent_id UUID NOT NULL REFERENCES agents (id) ON DELETE CASCADE,

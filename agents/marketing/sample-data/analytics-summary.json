@@ -1,0 +1,9 @@
+{
+  "periodStart": "2026-09-03",
+  "periodEnd": "2026-09-10",
+  "channels": [
+    { "channel": "instagram", "followers": 3420, "engagementRate": 0.031, "leadsFromChannel": 12 },
+    { "channel": "tiktok", "followers": 1850, "engagementRate": 0.058, "leadsFromChannel": 9 },
+    { "channel": "linkedin", "followers": 640, "engagementRate": 0.019, "leadsFromChannel": 4 }
+  ]
+}

@@ -9,16 +9,17 @@ datos.
 
 Piloto actual: **FIRMA IA** (firmaia.cl).
 
-Las fundaciones (base de datos, approval-gate, clase base `Agent`) y cinco agentes ya
-están construidos de punta a punta, cada uno con nombre y personalidad propios:
-**Mauricio** (Desarrollo, infraestructura), **Valentina** (Finanzas, primer uso real
-del approval-gate), **Francisca** (Legal, revisión de cumplimiento), **Camila**
-(Producto, único agente con acceso real a internet vía Tavily) y **Rodrigo** (CEO,
-lee los reportes de todos y arma la **pauta de comité** diaria — así es como los
-agentes "discuten": no chatean en vivo entre sí, el CEO cruza sus posiciones). Solo
-falta Marketing (publicidad/redes, se construye en un sprint posterior); ver
-[`docs/architecture.md`](docs/architecture.md) para la arquitectura completa y cómo
-funciona el comité.
+Las fundaciones (base de datos, approval-gate, content-gate, clase base `Agent`) y
+los 6 agentes ya están construidos de punta a punta, cada uno con nombre y
+personalidad propios: **Mauricio** (Desarrollo, infraestructura), **Valentina**
+(Finanzas, primer uso real del approval-gate), **Francisca** (Legal, revisión de
+cumplimiento), **Camila** (Producto, único agente con acceso real a internet vía
+Tavily), **Sofía** (Marketing, redes/contenido/campañas vía Metricool - mock este
+sprint - con su propio content-gate para que nada se publique sin revisión) y
+**Rodrigo** (CEO, lee los reportes de todos y arma la **pauta de comité** diaria —
+así es como los agentes "discuten": no chatean en vivo entre sí, el CEO cruza sus
+posiciones). Ver [`docs/architecture.md`](docs/architecture.md) para la arquitectura
+completa y cómo funciona el comité.
 
 ## Requisitos
 
@@ -158,12 +159,30 @@ mercado/competencia y deja propuestas de mejora (`propose_improvement`) con la
 evidencia detrás. El resultado de cada búsqueda se trata siempre como contenido
 externo no confiable (nunca como instrucción) antes de llegar al modelo.
 
+## Probar el agente de Marketing manualmente
+
+```bash
+npm run dev:marketing
+```
+
+Revisa calendario/métricas/comentarios de ejemplo (`agents/marketing/sample-data/`),
+deja posts orgánicos en `pending_review` (`propose_post`, vía **content-gate** -
+nunca publica) y, si hay evidencia suficiente, una propuesta de campaña paga o
+cambio de presupuesto en `pending_approval` (vía approval-gate - nunca la ejecuta).
+Uno de los comentarios de ejemplo es un intento de manipulación pidiendo saltarse la
+revisión humana; el agente lo marca como sospechoso y no lo obedece.
+
+```bash
+docker compose exec postgres psql -U aidmin -d aidmin -c \
+  "SELECT channel, status, content_text FROM content_reviews ORDER BY requested_at DESC LIMIT 5;"
+```
+
 ## Probar el CEO / Comité manualmente
 
 Corre despues de los demás para tener reportes que leer:
 
 ```bash
-npm run dev:desarrollo && npm run dev:finanzas && npm run dev:legal && npm run dev:producto
+npm run dev:desarrollo && npm run dev:finanzas && npm run dev:legal && npm run dev:producto && npm run dev:marketing
 npm run dev:ceo
 ```
 
@@ -190,6 +209,7 @@ npm run dev:finanzas:server     # POST http://localhost:4101/run
 npm run dev:legal:server        # POST http://localhost:4102/run
 npm run dev:producto:server     # POST http://localhost:4103/run
 npm run dev:ceo:server          # POST http://localhost:4104/run - correr al final
+npm run dev:marketing:server    # POST http://localhost:4105/run
 ```
 
 (Puertos configurables con `*_TRIGGER_PORT` en `.env`.)
@@ -199,10 +219,10 @@ Luego:
 1. Abre n8n en [http://localhost:5678](http://localhost:5678) (la primera vez te
    pide crear una cuenta de owner - email/nombre/password, es solo para tu instancia
    local).
-2. Importa los 5 workflows de `orchestrator/n8n/` (menú **⋯ → Import from File**):
+2. Importa los 6 workflows de `orchestrator/n8n/` (menú **⋯ → Import from File**):
    `desarrollo-daily-report.json`, `finanzas-cash-flow-review.json`,
    `legal-catalog-review.json`, `producto-market-research.json`,
-   `ceo-comite-diario.json`.
+   `marketing-content-review.json`, `ceo-comite-diario.json`.
 3. Crea una credencial de tipo **Postgres** (host `postgres`, puerto `5432`, database/
    usuario/password = los valores de `POSTGRES_DB`/`POSTGRES_USER`/`POSTGRES_PASSWORD`
    de tu `.env`) y asígnala a los nodos Postgres de cada workflow.
@@ -211,32 +231,36 @@ Luego:
    Postgres → n8n confirma que quedó guardado. Corre el del CEO al final, para que
    tenga reportes recientes de los demás que leer.
 5. Activa cada workflow (toggle **Active**) para que corran solos, en este orden por
-   horario: Finanzas `0 7 * * *`, Desarrollo `0 8 * * *`, Legal `0 9 * * *`, Producto
-   `30 9 * * *`, CEO `0 10 * * *` (con margen para que los demás ya hayan corrido).
+   horario: Finanzas `0 7 * * *`, Desarrollo `0 8 * * *`, Marketing `30 8 * * *`,
+   Legal `0 9 * * *`, Producto `30 9 * * *`, CEO `0 10 * * *` (con margen para que los
+   demás ya hayan corrido).
 
 > Nota: el nodo HTTP Request llama a `host.docker.internal`, que Docker Desktop
 > resuelve automáticamente a tu máquina host. Si más adelante corres n8n en Linux sin
 > Docker Desktop, cambia esa URL por la IP del host o usa `network_mode: host`.
 
-## Canal humano (approvals)
+## Canal humano (approvals y content reviews)
 
-El approval-gate impide que cualquier agente ejecute pagos, gastos, cambios de
-presupuesto o campañas pagas por sí solo. El agente de Finanzas ya lo usa de verdad
-(`propose_payment`); Marketing lo usará igual para `paid_campaign_launch`/
-`budget_change` cuando se construya. Para probarlo directo:
+Dos gates gemelos, uno por cada cosa irreversible del proyecto (dinero, marca
+pública):
 
 ```bash
-npm run dev:approval-gate
+npm run dev:approval-gate    # dinero/campañas - puerto 4000
+npm run dev:content-gate     # contenido orgánico - puerto 4001
 ```
 
 ```bash
-# Ver approvals pendientes
+# Approvals (dinero/campañas) - Finanzas y Marketing ya las usan de verdad
 curl http://localhost:4000/approvals
-
-# Aprobar una (reemplaza :id)
 curl -X POST http://localhost:4000/approvals/:id/approve \
   -H "Content-Type: application/json" \
   -d '{"resolvedBy": "atilio", "notes": "ok"}'
+
+# Content reviews (posts orgánicos) - Marketing ya los usa de verdad
+curl http://localhost:4001/content-reviews
+curl -X POST http://localhost:4001/content-reviews/:id/approve \
+  -H "Content-Type: application/json" \
+  -d '{"resolvedBy": "atilio", "notes": "ok, publicar"}'
 ```
 
 ## Estructura del repositorio
@@ -248,8 +272,10 @@ agents/
   finanzas/            # Valentina: idem, + propose_payment usando el approval-gate real
   legal/                # Francisca: revisa catalogo de documentos por cumplimiento
   producto/             # Camila: idem + tavily-client.ts (unico agente con web real)
+  marketing/            # Sofia: idem + propose_post (content-gate) y campañas (approval-gate)
   ceo/                  # Rodrigo: solo lectura (reports/approvals), arma la pauta de comite
-approval-gate/          # modulo de aprobacion humana obligatoria + tests + servidor HTTP
+approval-gate/          # aprobacion humana para dinero/campañas + tests + servidor HTTP
+content-gate/           # aprobacion humana para contenido publico + tests + servidor HTTP
 orchestrator/n8n/       # workflows exportados de n8n (uno por agente)
 db/                     # schema.sql, seed.sql
 docs/architecture.md    # arquitectura completa de referencia + como funciona el comite
@@ -258,14 +284,15 @@ docker-compose.yml      # Postgres + n8n para desarrollo local
 
 ## Qué NO hace este sprint
 
-- No conecta bancos, WhatsApp Business real, ni cuentas de ads reales.
-- No implementa el agente de Marketing (el esquema de DB y la clase `Agent` ya lo
-  soportan sin retrabajo, ver `docs/architecture.md`).
+- No conecta bancos, WhatsApp Business real, ni cuentas de ads reales. Marketing usa
+  Metricool mockeado (ver `LLM_PROVIDER`-style swap pendiente para cuando haya una
+  API key real de Metricool).
 - Los agentes no chatean en vivo entre sí - "discuten" via síntesis secuencial: cada
   uno reporta independiente y el CEO cruza sus posiciones despues (ver
   `docs/architecture.md`, sección "El Comité").
-- Desarrollo, Finanzas y Legal usan datos mock (sin Sentry/GitHub, SII/Fintoc,
-  sistema documental real). Producto es la única excepción deliberada: tiene acceso
-  real a internet vía Tavily. Finanzas nunca ejecuta una transferencia - solo deja
-  propuestas en `pending_approval`; Legal y Producto nunca publican nada - solo dejan
-  marcas/propuestas pendientes de revisión humana.
+- Desarrollo, Finanzas, Legal y Marketing usan datos mock (sin Sentry/GitHub,
+  SII/Fintoc, sistema documental o Metricool real). Producto es la única excepción
+  deliberada: tiene acceso real a internet vía Tavily. Finanzas nunca ejecuta una
+  transferencia; Marketing nunca publica ni lanza una campaña; Legal y Producto nunca
+  publican nada - todos dejan marcas/propuestas pendientes de revisión humana vía
+  approval-gate o content-gate.

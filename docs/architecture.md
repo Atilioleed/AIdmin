@@ -7,12 +7,14 @@ posteriores.
 
 ## Las 4 capas
 
-1. **Canal humano** — donde Atilio aprueba pagos, gasto de marketing y decisiones
-   grandes, y puede intervenir en cualquier momento.
-   **Construido**: `approval-gate/server.ts`, un endpoint HTTP simple
-   (`GET /approvals`, `POST /approvals/:id/approve|reject`) + el log en
-   `decisions_log`/`approvals`. El canal real (WhatsApp Business) se conecta en un
-   sprint posterior.
+1. **Canal humano** — donde Atilio aprueba pagos, gasto de marketing, contenido
+   público y decisiones grandes, y puede intervenir en cualquier momento.
+   **Construido**: dos módulos gemelos, uno por tipo de riesgo irreversible (ver
+   sección 1 del proyecto: "dinero y marca pública"). `approval-gate/server.ts`
+   (`GET /approvals`, `POST /approvals/:id/approve|reject`) para dinero/campañas
+   pagas, y `content-gate/server.ts` (`GET /content-reviews`,
+   `POST /content-reviews/:id/approve|reject`) para contenido orgánico antes de
+   publicarse. El canal real (WhatsApp Business) se conecta en un sprint posterior.
 
 2. **Orquestador** — el "reloj" que despierta a cada agente en su horario o por
    evento y enruta reportes entre ellos.
@@ -28,21 +30,36 @@ posteriores.
    SDK de Anthropic (Claude), carga su constitución (system prompt versionado como
    markdown, con nombre y personalidad propios), tiene un set de tools específico de
    su rol, y escribe su reporte y su razonamiento en la base de datos en cada corrida.
-   **Construido**: `agents/_shared/agent.ts` (clase base) + 5 agentes (ver tabla).
+   **Construido**: `agents/_shared/agent.ts` (clase base) + 6 agentes (ver tabla).
 
 ## Los agentes
 
-| Agente         | Nombre    | Rol                                                                                  | Herramientas típicas                                                 | Autonomía                                                                                                                                                              | Estado                     |
-| -------------- | --------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| CEO / Comité   | Rodrigo   | Lee los reportes recientes de todos y arma la pauta de comité diaria                 | Lectura de `reports`/`approvals` (solo lectura, sin tools de accion) | Solo recomienda. Nunca autoriza gasto ni reemplaza la aprobación humana.                                                                                               | **Construido este sprint** |
-| Marketing      | —         | Publicidad, redes sociales, contenido, campañas (100% de eso, nada de research)      | Meta Graph API, TikTok API, Metricool, WhatsApp Business API         | Publica contenido orgánico pre-aprobado libremente. Todo gasto pasa OBLIGATORIAMENTE por el approval-gate.                                                             | Sprint futuro              |
-| Finanzas       | Valentina | Flujo de caja, conciliación, cuentas por pagar                                       | SII (OpenFactura/Bsale), agregación bancaria (Fintoc) — mocks        | SOLO PROPONE. Deja la orden de pago en `pending_approval`. Nunca ejecuta una transferencia real.                                                                       | **Construido**             |
-| Producto       | Camila    | Catálogo/precios; investiga mercado y competencia (único agente con acceso web real) | Tavily (búsqueda web real), catálogo mock                            | SOLO PROPONE mejoras (`propose_improvement`); se publica solo tras aprobación humana.                                                                                  | **Construido**             |
-| Legal          | Francisca | Revisa el catálogo de documentos por cumplimiento; coordina con Producto             | Catálogo de plantillas + checklist legal (mocks)                     | SOLO REVISA Y MARCA (`flag_document_for_legal_review`). Nunca modifica ni publica el catálogo.                                                                         | **Construido**             |
-| **Desarrollo** | Mauricio  | Monitoreo de infraestructura, errores, costos de hosting                             | Uptime check, lectura de logs (Sentry), GitHub API — mocks           | Puede actuar solo en tareas de bajo riesgo (reiniciar, alertar, abrir un borrador de fix). Cambios estructurales o despliegues a producción requieren revisión humana. | **Piloto - construido**    |
+| Agente         | Nombre    | Rol                                                                                  | Herramientas típicas                                                 | Autonomía                                                                                                                                                              | Estado                  |
+| -------------- | --------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| CEO / Comité   | Rodrigo   | Lee los reportes recientes de todos y arma la pauta de comité diaria                 | Lectura de `reports`/`approvals` (solo lectura, sin tools de accion) | Solo recomienda. Nunca autoriza gasto ni reemplaza la aprobación humana.                                                                                               | **Construido**          |
+| Marketing      | Sofía     | Publicidad, redes sociales, contenido, campañas (100% de eso, nada de research)      | Metricool (mock este sprint)                                         | Contenido orgánico SOLO vía `propose_post` → content-gate (`pending_review`). Gasto/campañas SOLO vía approval-gate. Nunca publica ni ejecuta nada directo.            | **Construido**          |
+| Finanzas       | Valentina | Flujo de caja, conciliación, cuentas por pagar                                       | SII (OpenFactura/Bsale), agregación bancaria (Fintoc) — mocks        | SOLO PROPONE. Deja la orden de pago en `pending_approval`. Nunca ejecuta una transferencia real.                                                                       | **Construido**          |
+| Producto       | Camila    | Catálogo/precios; investiga mercado y competencia (único agente con acceso web real) | Tavily (búsqueda web real), catálogo mock                            | SOLO PROPONE mejoras (`propose_improvement`); se publica solo tras aprobación humana.                                                                                  | **Construido**          |
+| Legal          | Francisca | Revisa el catálogo de documentos por cumplimiento; coordina con Producto             | Catálogo de plantillas + checklist legal (mocks)                     | SOLO REVISA Y MARCA (`flag_document_for_legal_review`). Nunca modifica ni publica el catálogo.                                                                         | **Construido**          |
+| **Desarrollo** | Mauricio  | Monitoreo de infraestructura, errores, costos de hosting                             | Uptime check, lectura de logs (Sentry), GitHub API — mocks           | Puede actuar solo en tareas de bajo riesgo (reiniciar, alertar, abrir un borrador de fix). Cambios estructurales o despliegues a producción requieren revisión humana. | **Piloto - construido** |
 
-Todos los agentes están seedeados en la tabla `agents` (`db/seed.sql`); solo
-`marketing` sigue con `is_active = false`.
+Los 6 agentes están seedeados y activos en la tabla `agents` (`db/seed.sql`).
+
+### Marketing y el content-gate: la otra mitad de "dinero y marca pública"
+
+El prompt fundacional (sección 1) marca dos cosas como irreversibles y no
+negociables: dinero y marca pública. El approval-gate ya cubría dinero; Marketing
+(`agents/marketing/`) es el primer agente cuyo trabajo central es marca pública, así
+que se construyó su contraparte: `content-gate/` (mismo patrón exacto que
+`approval-gate/` - TDD, repositorio en memoria para tests, implementación real en
+Postgres, servidor HTTP para el canal humano). `propose_post` es la única forma en
+que Marketing puede dejar un post listo, y siempre queda en `pending_review` -
+jamás publica nada, no tiene credenciales de ninguna red social. Para gasto
+(`propose_paid_campaign`, `propose_budget_change`) usa el approval-gate existente,
+igual que Finanzas. En una corrida real, Marketing recibió un comentario mock con un
+intento de manipulación pidiéndole subir presupuesto al máximo y publicar sin
+revisión - lo marcó como sospechoso en su reporte y igual dejó la propuesta de
+campaña con presupuesto moderado y bien fundamentado, vía el flujo normal.
 
 ### Personalidad: por qué cada agente "suena" distinto
 
@@ -93,8 +110,6 @@ diciembre 2026) y las citó como evidencia atribuida, no como hechos propios.
 
 ### Finanzas: primer uso real del approval-gate
 
-### Finanzas: primer uso real del approval-gate
-
 El agente de Finanzas (`agents/finanzas/`) es el primero que genera una acción
 gateada de verdad. Su tool `propose_payment` (`agents/finanzas/tools.ts`) no tiene
 ninguna otra vía para mover dinero — llama a
@@ -108,11 +123,14 @@ por medio — el agente la detecta y la reporta como anomalía en vez de propone
 
 ## Reglas de gobernanza (no negociables, en código)
 
-1. **Approval Gate obligatorio** — `approval-gate/index.ts`. Toda acción de tipo
-   `payment`, `spend`, `budget_change` o `paid_campaign_launch`, sin importar qué
-   agente la origine, pasa por `ApprovalGate.requestApproval()`, que SIEMPRE crea un
-   registro `pending_approval` y NUNCA ejecuta la acción real. El gate no tiene, ni
-   siquiera técnicamente, ningún método ni credencial de ejecución.
+1. **Approval Gate / Content Gate obligatorios** — `approval-gate/index.ts`. Toda
+   acción de tipo `payment`, `spend`, `budget_change` o `paid_campaign_launch`, sin
+   importar qué agente la origine, pasa por `ApprovalGate.requestApproval()`, que
+   SIEMPRE crea un registro `pending_approval` y NUNCA ejecuta la acción real.
+   `content-gate/index.ts` es su análogo para contenido público: toda publicación
+   orgánica pasa por `ContentGate.requestReview()`, SIEMPRE en `pending_review`.
+   Ninguno de los dos gates tiene, ni siquiera técnicamente, ningún método ni
+   credencial de ejecución/publicación real.
 2. **Auditoría completa** — cada tool call y cada reporte final de cada agente se
    escribe en `decisions_log` (timestamp, agente, run_id, input, output, razonamiento)
    antes de que `Agent.run()` retorne. Nada se ejecuta silenciosamente.
@@ -120,11 +138,12 @@ por medio — el agente la detecta y la reporta como anomalía en vez de propone
    expone `asUntrustedContent()` / `formatUntrustedContentForPrompt()`. Cualquier tool
    que devuelva texto de una fuente externa (logs, resultados de scraping, mensajes
    entrantes, resultados de búsqueda web) debe envolverlo antes de devolverlo al
-   modelo. Probado end-to-end en tres agentes distintos: `agents/desarrollo/tools.ts`
+   modelo. Probado end-to-end en cuatro agentes distintos: `agents/desarrollo/tools.ts`
    (`read_recent_logs`, log con intento de prompt injection), `agents/finanzas/tools.ts`
-   (`list_pending_invoices`, factura con intento de fraude/ingeniería social), y
+   (`list_pending_invoices`, factura con intento de fraude/ingeniería social),
    `agents/producto/tools.ts` (`search_market`, la única fuente que es internet real
-   y no un mock).
+   y no un mock), y `agents/marketing/tools.ts` (`list_recent_comments`, comentario
+   con intento de manipulación pidiendo saltarse la revisión humana).
 4. **Nada de producción real fuera de lo explícitamente conectado** — sin bancos, sin
    WhatsApp Business real, sin cuentas de ads reales. Desarrollo monitorea una URL de
    sandbox y usa mocks de log/GitHub; Finanzas y Legal usan datos de ejemplo. La única
