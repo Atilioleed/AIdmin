@@ -17,12 +17,16 @@
   --color-coral: #ff5a7a;
   --color-orange: #ff8a5b;
   --color-violet: #6a4cff;
-  --color-violet-deep: #2f2359;
+  --color-violet-deep: #241a47;
+  --color-violet-night: #150f2c;
   --color-violet-ink: #3a2e6b;
+  --color-gold: #f7bc45;
+  --color-gold-soft: #ffe3ad;
 
   --gradient-warm: linear-gradient(135deg, var(--color-coral), var(--color-orange));
   --gradient-cool: linear-gradient(135deg, var(--color-violet), #9b7bff);
   --gradient-brand: linear-gradient(120deg, var(--color-coral) 0%, var(--color-orange) 45%, var(--color-violet) 100%);
+  --gradient-hero: radial-gradient(120% 140% at 15% -10%, #3a2a6b 0%, var(--color-violet-deep) 45%, var(--color-violet-night) 100%);
 
   /* Estado (reservado — nunca se reusa como acento categorico) */
   --color-good: #1c9a6c;
@@ -120,10 +124,43 @@ body {
   animation: drift 14s ease-in-out infinite;
 }
 
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.animate-float {
+  animation: float-y 5s ease-in-out infinite;
+}
+
+/* Revelado al hacer scroll (ver components/marketing/Reveal.tsx) */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-rise-in,
   .animate-pulse-glow,
-  .animate-drift {
+  .animate-drift,
+  .animate-float {
     animation: none !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
