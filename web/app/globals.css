@@ -1,26 +1,129 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Superficies */
+  --color-surface: #ffffff;
+  --color-surface-sunken: #faf8fc;
+  --color-surface-raised: #ffffff;
+  --color-border: #ece7f5;
+  --color-border-soft: #f2eef9;
+
+  /* Tinta */
+  --color-ink: #1c1730;
+  --color-ink-soft: #635d7d;
+  --color-ink-faint: #9791ac;
+
+  /* Acentos — la calidez de "AI" contra el violeta profundo de "dmin" */
+  --color-coral: #ff5a7a;
+  --color-orange: #ff8a5b;
+  --color-violet: #6a4cff;
+  --color-violet-deep: #2f2359;
+  --color-violet-ink: #3a2e6b;
+
+  --gradient-warm: linear-gradient(135deg, var(--color-coral), var(--color-orange));
+  --gradient-cool: linear-gradient(135deg, var(--color-violet), #9b7bff);
+  --gradient-brand: linear-gradient(120deg, var(--color-coral) 0%, var(--color-orange) 45%, var(--color-violet) 100%);
+
+  /* Estado (reservado — nunca se reusa como acento categorico) */
+  --color-good: #1c9a6c;
+  --color-good-bg: #e6f7ef;
+  --color-warn: #d98c1a;
+  --color-warn-bg: #fdf1de;
+  --color-critical: #e0446a;
+  --color-critical-bg: #fdeaef;
+
+  --shadow-card: 0 1px 2px rgba(28, 23, 48, 0.04), 0 8px 24px -12px rgba(58, 46, 107, 0.18);
+  --shadow-card-hover: 0 4px 10px rgba(28, 23, 48, 0.06), 0 16px 32px -12px rgba(106, 76, 255, 0.24);
+  --shadow-glow: 0 0 0 1px rgba(255, 90, 122, 0.12), 0 8px 30px -8px rgba(106, 76, 255, 0.35);
+
+  --background: var(--color-surface-sunken);
+  --foreground: var(--color-ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-mono: ui-monospace, "Cascadia Code", "Consolas", monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Textura de fondo: dos manchas de color muy tenues, ancladas, sin animar el layout */
+.bg-mesh {
+  background-image:
+    radial-gradient(60rem 40rem at -10% -10%, rgba(255, 90, 122, 0.09), transparent 60%),
+    radial-gradient(50rem 36rem at 110% 0%, rgba(106, 76, 255, 0.1), transparent 55%),
+    radial-gradient(40rem 30rem at 50% 120%, rgba(255, 138, 91, 0.07), transparent 60%);
+}
+
+.text-gradient-warm {
+  background: var(--gradient-warm);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-card);
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 90, 122, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 90, 122, 0);
+  }
+}
+
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(1.5%, -2%, 0) scale(1.04);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-rise-in {
+  animation: rise-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2.6s ease-in-out infinite;
+}
+
+.animate-drift {
+  animation: drift 14s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise-in,
+  .animate-pulse-glow,
+  .animate-drift {
+    animation: none !important;
+  }
 }
