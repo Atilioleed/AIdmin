@@ -4,6 +4,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { Pool } from 'pg';
 import { getPool } from './db.js';
 import { loadAgentProfile, formatAgentProfileForPrompt } from './agent-profile.js';
+import { checkDailyCapOk, recordUsage } from './usage.js';
 import type { AgentSlug, DecisionType } from './types.js';
 
 export interface AgentToolContext {
@@ -55,6 +56,10 @@ export interface AgentRunResult {
   agentId: string;
   finalText: string;
   toolCallCount: number;
+  // true = esta corrida no llamo al modelo porque ya se paso el tope diario de
+  // tokens de este tenant+agente (tenants.daily_token_cap_per_agent). finalText
+  // trae una nota explicando esto, no un reporte real.
+  capped: boolean;
 }
 
 const DEFAULT_MODEL = 'claude-sonnet-5';
@@ -87,6 +92,19 @@ export class Agent {
   async run(userContext: string): Promise<AgentRunResult> {
     const runId = randomUUID();
     const agentId = await this.getAgentId();
+
+    const cap = await checkDailyCapOk(this.pool, this.config.tenantId, this.config.slug);
+    if (!cap.ok) {
+      const finalText =
+        `Se alcanzó el tope diario de uso para este agente (${cap.usedTokens.toLocaleString('es-CL')} / ` +
+        `${cap.capTokens.toLocaleString('es-CL')} tokens). No se ejecutó ninguna consulta al modelo hoy - ` +
+        'vuelve a correr mañana o pide que se suba el tope desde /admin/tenants.';
+      await this.logDecision(agentId, runId, 'error', null, null, null, finalText);
+      await this.saveReport(agentId, runId, finalText);
+      await recordUsage(this.pool, this.config.tenantId, this.config.slug, 0, 0, true);
+      return { runId, agentId, finalText, toolCallCount: 0, capped: true };
+    }
+
     const profile = await loadAgentProfile(this.pool, this.config.slug);
     const system = `${formatAgentProfileForPrompt(profile)}\n\n---\n\n${this.fixedConstitution}`;
     const model = this.config.model ?? process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
@@ -102,6 +120,8 @@ export class Agent {
     const messages: Anthropic.MessageParam[] = [{ role: 'user', content: userContext }];
     let toolCallCount = 0;
     let finalText = '';
+    let totalInputTokens = 0;
+    let totalOutputTokens = 0;
 
     for (let iteration = 0; iteration < maxIterations; iteration += 1) {
       const response = await this.anthropic.messages.create({
@@ -111,6 +131,9 @@ export class Agent {
         messages,
         tools,
       });
+
+      totalInputTokens += response.usage.input_tokens;
+      totalOutputTokens += response.usage.output_tokens;
 
       const textBlocks = response.content.filter(
         (block): block is Anthropic.TextBlock => block.type === 'text',
@@ -188,8 +211,9 @@ export class Agent {
     }
 
     await this.saveReport(agentId, runId, finalText);
+    await recordUsage(this.pool, this.config.tenantId, this.config.slug, totalInputTokens, totalOutputTokens, false);
 
-    return { runId, agentId, finalText, toolCallCount };
+    return { runId, agentId, finalText, toolCallCount, capped: false };
   }
 
   private async getAgentId(): Promise<string> {

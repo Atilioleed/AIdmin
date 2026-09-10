@@ -14,6 +14,7 @@ export interface BusinessContext {
   competitors: string;
   scalability: string;
   ownerAlertEmail: string;
+  ownerWhatsappNumber: string;
   updatedAt: Date | null;
   updatedBy: string | null;
 }
@@ -30,6 +31,7 @@ interface BusinessContextRow {
   competitors: string | null;
   scalability: string | null;
   owner_alert_email: string | null;
+  owner_whatsapp_number: string | null;
   updated_at: Date;
   updated_by: string | null;
 }
@@ -46,6 +48,7 @@ const EMPTY: BusinessContext = {
   competitors: '',
   scalability: '',
   ownerAlertEmail: '',
+  ownerWhatsappNumber: '',
   updatedAt: null,
   updatedBy: null,
 };
@@ -63,6 +66,7 @@ function toBusinessContext(row: BusinessContextRow): BusinessContext {
     competitors: row.competitors ?? '',
     scalability: row.scalability ?? '',
     ownerAlertEmail: row.owner_alert_email ?? '',
+    ownerWhatsappNumber: row.owner_whatsapp_number ?? '',
     updatedAt: row.updated_at,
     updatedBy: row.updated_by,
   };
@@ -71,7 +75,8 @@ function toBusinessContext(row: BusinessContextRow): BusinessContext {
 export async function getBusinessContext(tenantId: string): Promise<BusinessContext> {
   const result = await getPool().query<BusinessContextRow>(
     `SELECT business_type, objective, problem, products_services, target_market, revenue_model,
-            capital_stock, innovation, competitors, scalability, owner_alert_email, updated_at, updated_by
+            capital_stock, innovation, competitors, scalability, owner_alert_email,
+            owner_whatsapp_number, updated_at, updated_by
      FROM business_context WHERE tenant_id = $1`,
     [tenantId],
   );
@@ -91,6 +96,7 @@ export interface BusinessContextInput {
   competitors: string;
   scalability: string;
   ownerAlertEmail: string;
+  ownerWhatsappNumber: string;
   updatedBy: string;
 }
 
@@ -98,8 +104,8 @@ export async function upsertBusinessContext(tenantId: string, input: BusinessCon
   await getPool().query(
     `INSERT INTO business_context
        (tenant_id, business_type, objective, problem, products_services, target_market, revenue_model,
-        capital_stock, innovation, competitors, scalability, owner_alert_email, updated_by)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        capital_stock, innovation, competitors, scalability, owner_alert_email, owner_whatsapp_number, updated_by)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
      ON CONFLICT (tenant_id) DO UPDATE SET
        business_type = EXCLUDED.business_type,
        objective = EXCLUDED.objective,
@@ -112,6 +118,7 @@ export async function upsertBusinessContext(tenantId: string, input: BusinessCon
        competitors = EXCLUDED.competitors,
        scalability = EXCLUDED.scalability,
        owner_alert_email = EXCLUDED.owner_alert_email,
+       owner_whatsapp_number = EXCLUDED.owner_whatsapp_number,
        updated_by = EXCLUDED.updated_by`,
     [
       tenantId,
@@ -126,6 +133,7 @@ export async function upsertBusinessContext(tenantId: string, input: BusinessCon
       input.competitors,
       input.scalability,
       input.ownerAlertEmail || null,
+      input.ownerWhatsappNumber || null,
       input.updatedBy,
     ],
   );

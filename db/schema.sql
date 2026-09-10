@@ -14,6 +14,12 @@ CREATE TABLE IF NOT EXISTS tenants (
     status IN ('trial', 'active', 'paused', 'cancelled')
   ),
   clerk_org_id TEXT UNIQUE,
+  -- Tope de tokens (input+output) por agente por dia. Protege el costo real de
+  -- AIdmin como negocio; el agente igual corre todos los dias, solo deja de llamar
+  -- al modelo si un agente puntual se pasa de su presupuesto de HOY (ver
+  -- agents/_shared/usage.ts). Default generoso para Sonnet, ajustable por pyme -
+  -- tiene sentido subirlo en planes superiores.
+  daily_token_cap_per_agent INTEGER NOT NULL DEFAULT 200000,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -157,6 +163,23 @@ CREATE TABLE IF NOT EXISTS reports (
 CREATE INDEX IF NOT EXISTS idx_reports_agent_id ON reports (agent_id);
 CREATE INDEX IF NOT EXISTS idx_reports_created_at ON reports (created_at);
 
+-- Uso de tokens agregado por tenant+agente+dia (no una fila por llamada al modelo -
+-- alcanza para el tope diario y para el panel admin, y es mucho mas liviano). Se
+-- upsertea al final de cada corrida (agents/_shared/usage.ts); Agent.run() la
+-- consulta ANTES de llamar al modelo para saber si ya se paso el tope del dia.
+CREATE TABLE IF NOT EXISTS agent_usage_daily (
+  tenant_id UUID NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  agent_slug TEXT NOT NULL,
+  usage_date DATE NOT NULL,
+  input_tokens BIGINT NOT NULL DEFAULT 0,
+  output_tokens BIGINT NOT NULL DEFAULT 0,
+  run_count INTEGER NOT NULL DEFAULT 0,
+  capped_run_count INTEGER NOT NULL DEFAULT 0, -- corridas que se saltaron el modelo por tope alcanzado
+  PRIMARY KEY (tenant_id, agent_slug, usage_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_usage_daily_tenant ON agent_usage_daily (tenant_id, usage_date);
+
 -- Archivos/fotos que un cliente sube desde el panel para darle contexto a sus
 -- gerentes. agent_slug NULL = visible para todos los agentes de ese tenant.
 -- El contenido (caption) es dato externo: se envuelve con asUntrustedContent() en
@@ -198,6 +221,10 @@ CREATE TABLE IF NOT EXISTS business_context (
   -- hay algo pendiente (aprobaciones/contenido). NULL = no manda nada. Lo carga el
   -- cliente mismo, no el admin (ver agents/ceo/index.ts).
   owner_alert_email TEXT,
+  -- Numero de WhatsApp del dueno para cuando se conecte el canal de WhatsApp
+  -- (roadmap, ver docs/architecture.md) - se recolecta desde ya para no partir de
+  -- cero el dia que se conecte de verdad. Todavia NO se usa para enviar nada.
+  owner_whatsapp_number TEXT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_by TEXT
 );

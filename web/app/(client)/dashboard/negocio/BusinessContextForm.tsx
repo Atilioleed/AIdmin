@@ -81,6 +81,23 @@ export function BusinessContextForm({ context }: { context: BusinessContext }) {
         </p>
       </div>
 
+      <div>
+        <label className="mb-1 block text-xs font-medium text-neutral-600">
+          WhatsApp del dueño <span className="text-neutral-400">(próximamente)</span>
+        </label>
+        <input
+          type="tel"
+          name="ownerWhatsappNumber"
+          defaultValue={context.ownerWhatsappNumber}
+          placeholder="+56 9 1234 5678"
+          className="w-full rounded border border-neutral-300 px-2 py-1.5 text-sm"
+        />
+        <p className="mt-1 text-xs text-neutral-400">
+          Todavía no está conectado el chat en vivo con el CEO por WhatsApp — dejamos tu número
+          guardado para activarlo apenas esté listo, sin que tengas que volver a completarlo.
+        </p>
+      </div>
+
       {error && <p className="text-xs text-red-600">{error}</p>}
       {saved && !error && <p className="text-xs text-emerald-600">Guardado.</p>}
 

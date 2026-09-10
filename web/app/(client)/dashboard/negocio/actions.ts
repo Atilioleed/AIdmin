@@ -37,10 +37,12 @@ export async function saveBusinessContextAction(formData: FormData): Promise<{ e
     return { error: 'El correo de alertas no es válido.' };
   }
 
+  const ownerWhatsappNumber = String(formData.get('ownerWhatsappNumber') ?? '').trim();
+
   const user = await currentUser();
   const updatedBy = user?.primaryEmailAddress?.emailAddress ?? user?.id ?? 'usuario del panel';
 
-  await upsertBusinessContext(tenant.id, { ...values, businessType, ownerAlertEmail, updatedBy });
+  await upsertBusinessContext(tenant.id, { ...values, businessType, ownerAlertEmail, ownerWhatsappNumber, updatedBy });
 
   revalidatePath('/dashboard/negocio');
   revalidatePath('/dashboard');

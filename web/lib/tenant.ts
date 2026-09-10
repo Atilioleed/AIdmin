@@ -49,6 +49,12 @@ export async function getCurrentTenant(): Promise<TenantRecord | null> {
   return row ? toTenant(row) : null;
 }
 
+export async function getTenantById(tenantId: string): Promise<TenantRecord | null> {
+  const result = await getPool().query(`SELECT ${SELECT_COLUMNS} FROM tenants WHERE id = $1`, [tenantId]);
+  const row = result.rows[0] as Parameters<typeof toTenant>[0] | undefined;
+  return row ? toTenant(row) : null;
+}
+
 export async function listTenants(): Promise<TenantRecord[]> {
   const result = await getPool().query(`SELECT ${SELECT_COLUMNS} FROM tenants ORDER BY created_at DESC`);
   return (result.rows as Parameters<typeof toTenant>[0][]).map(toTenant);

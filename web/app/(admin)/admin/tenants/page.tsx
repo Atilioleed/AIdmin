@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { listTenants } from '../../../../lib/tenant';
 import { PLAN_LABELS } from '../../../../lib/plans';
 import { NewTenantForm } from './NewTenantForm';
@@ -37,12 +38,13 @@ export default async function TenantsPage() {
                 <th className="px-5 py-3 font-semibold">Estado</th>
                 <th className="px-5 py-3 font-semibold">Clerk Org</th>
                 <th className="px-5 py-3 font-semibold">Creada</th>
+                <th className="px-5 py-3 font-semibold"></th>
               </tr>
             </thead>
             <tbody>
               {tenants.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-[var(--color-ink-faint)]">
+                  <td colSpan={7} className="px-5 py-8 text-center text-[var(--color-ink-faint)]">
                     Todavía no hay pymes afiliadas — crea la primera arriba.
                   </td>
                 </tr>
@@ -67,6 +69,11 @@ export default async function TenantsPage() {
                     <td className="px-5 py-3 font-mono text-xs text-[var(--color-ink-faint)]">{t.clerkOrgId ?? '—'}</td>
                     <td className="px-5 py-3 text-[var(--color-ink-faint)]">
                       {new Date(t.createdAt).toLocaleDateString('es-CL')}
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <Link href={`/admin/tenants/${t.id}`} className="text-xs font-semibold text-[var(--color-violet)] hover:text-[var(--color-coral)]">
+                        Uso y límites →
+                      </Link>
                     </td>
                   </tr>
                 );
