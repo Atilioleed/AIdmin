@@ -2,9 +2,9 @@
 
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
-import { insertClientUpload } from '../../../../lib/queries.js';
-import { getCurrentTenant } from '../../../../lib/tenant.js';
-import { getUploadsStorage, validateUpload } from '../../../../lib/uploads-storage.js';
+import { insertClientUpload } from '../../../../lib/queries';
+import { getCurrentTenant } from '../../../../lib/tenant';
+import { getUploadsStorage, validateUpload } from '../../../../lib/uploads-storage';
 
 export async function uploadClientFileAction(formData: FormData): Promise<{ error?: string }> {
   const tenant = await getCurrentTenant();

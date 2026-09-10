@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useTransition } from 'react';
-import { createTenantAction } from './actions.js';
+import { createTenantAction } from './actions';
 
 export function NewTenantForm() {
   const formRef = useRef<HTMLFormElement>(null);

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
-import { getCurrentTenant } from '../../../../lib/tenant.js';
-import { listPendingApprovals } from '../../../../lib/queries.js';
-import { ApprovalCard } from './ApprovalCard.js';
+import { getCurrentTenant } from '../../../../lib/tenant';
+import { listPendingApprovals } from '../../../../lib/queries';
+import { ApprovalCard } from './ApprovalCard';
 
 export default async function ApprovalsPage() {
   const tenant = await getCurrentTenant();

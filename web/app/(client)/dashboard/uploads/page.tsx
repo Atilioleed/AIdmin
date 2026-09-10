@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
-import { getCurrentTenant } from '../../../../lib/tenant.js';
-import { listClientUploads } from '../../../../lib/queries.js';
-import { UploadForm } from './UploadForm.js';
+import { getCurrentTenant } from '../../../../lib/tenant';
+import { listClientUploads } from '../../../../lib/queries';
+import { UploadForm } from './UploadForm';
 
 export default async function UploadsPage() {
   const tenant = await getCurrentTenant();

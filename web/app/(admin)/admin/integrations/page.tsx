@@ -1,4 +1,4 @@
-import { getPool } from '../../../../lib/db.js';
+import { getPool } from '../../../../lib/db';
 
 const AGENT_HEALTH_ENDPOINTS = [
   { name: 'Desarrollo', url: 'http://localhost:4100/health' },

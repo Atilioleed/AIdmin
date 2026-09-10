@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
+import { isCurrentUserPlatformAdmin } from '@/lib/tenant.js';
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Resumen' },
@@ -7,7 +9,12 @@ const NAV_ITEMS = [
   { href: '/admin/integrations', label: 'Integraciones' },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // proxy.ts solo garantiza que hay sesion; esta es la autorizacion real (por correo).
+  if (!(await isCurrentUserPlatformAdmin())) {
+    redirect('/no-autorizado');
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between border-b border-neutral-200 bg-neutral-900 px-6 py-3">

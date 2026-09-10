@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
-import { getCurrentTenant } from '../../../../lib/tenant.js';
-import { listReports } from '../../../../lib/queries.js';
+import { getCurrentTenant } from '../../../../lib/tenant';
+import { listReports } from '../../../../lib/queries';
 
 export default async function ReportsPage() {
   const tenant = await getCurrentTenant();

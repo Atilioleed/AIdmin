@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useTransition } from 'react';
-import { uploadClientFileAction } from './actions.js';
+import { uploadClientFileAction } from './actions';
 
 const AGENT_OPTIONS = [
   { value: 'all', label: 'Todos los gerentes' },

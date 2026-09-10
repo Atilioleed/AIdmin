@@ -2,9 +2,9 @@
 
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
-import { getPool } from '../../../../lib/db.js';
-import { approveContentReview, rejectContentReview } from '../../../../lib/gates.js';
-import { getCurrentTenant } from '../../../../lib/tenant.js';
+import { getPool } from '../../../../lib/db';
+import { approveContentReview, rejectContentReview } from '../../../../lib/gates';
+import { getCurrentTenant } from '../../../../lib/tenant';
 
 async function resolvedByLabel(): Promise<string> {
   const user = await currentUser();

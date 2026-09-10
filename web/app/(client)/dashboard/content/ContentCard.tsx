@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { approveContentAction, rejectContentAction } from './actions.js';
+import { approveContentAction, rejectContentAction } from './actions';
 
 export function ContentCard({
   id,

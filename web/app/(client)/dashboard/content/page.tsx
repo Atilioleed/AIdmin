@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
-import { getCurrentTenant } from '../../../../lib/tenant.js';
-import { listPendingContentReviews } from '../../../../lib/queries.js';
-import { ContentCard } from './ContentCard.js';
+import { getCurrentTenant } from '../../../../lib/tenant';
+import { listPendingContentReviews } from '../../../../lib/queries';
+import { ContentCard } from './ContentCard';
 
 export default async function ContentPage() {
   const tenant = await getCurrentTenant();

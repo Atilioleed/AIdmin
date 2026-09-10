@@ -1,5 +1,5 @@
-import { listTenants } from '../../../lib/tenant.js';
-import { PLAN_PRICES_CLP, formatClp } from '../../../lib/plans.js';
+import { listTenants } from '../../../lib/tenant';
+import { PLAN_PRICES_CLP, formatClp } from '../../../lib/plans';
 
 export default async function AdminOverviewPage() {
   const tenants = await listTenants();

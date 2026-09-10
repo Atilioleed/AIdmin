@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { OrganizationSwitcher, UserButton } from '@clerk/nextjs';
-import { getCurrentTenant } from '../../lib/tenant.js';
+import { getCurrentTenant } from '../../lib/tenant';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Comité' },

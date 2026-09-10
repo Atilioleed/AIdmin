@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
-import { getCurrentTenant } from '../../../lib/tenant.js';
-import { getLatestReport } from '../../../lib/queries.js';
+import { getCurrentTenant } from '../../../lib/tenant';
+import { getLatestReport } from '../../../lib/queries';
 
 export default async function DashboardPage() {
   const tenant = await getCurrentTenant();

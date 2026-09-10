@@ -1,6 +1,6 @@
-import { listTenants } from '../../../../lib/tenant.js';
-import { PLAN_LABELS } from '../../../../lib/plans.js';
-import { NewTenantForm } from './NewTenantForm.js';
+import { listTenants } from '../../../../lib/tenant';
+import { PLAN_LABELS } from '../../../../lib/plans';
+import { NewTenantForm } from './NewTenantForm';
 
 const STATUS_LABEL: Record<string, string> = {
   trial: 'Prueba',

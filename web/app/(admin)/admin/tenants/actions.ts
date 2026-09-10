@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getPool } from '../../../../lib/db.js';
+import { getPool } from '../../../../lib/db';
 
 const AGENT_SEEDS = [
   ['desarrollo', 'Gerente de Desarrollo', 'Monitoreo de infraestructura, errores y costos de hosting.', 'act_low_risk'],

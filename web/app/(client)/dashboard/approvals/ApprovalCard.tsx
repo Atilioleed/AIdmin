@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { approveApprovalAction, rejectApprovalAction } from './actions.js';
+import { approveApprovalAction, rejectApprovalAction } from './actions';
 
 const ACTION_TYPE_LABEL: Record<string, string> = {
   payment: 'Pago',

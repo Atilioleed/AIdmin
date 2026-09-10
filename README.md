@@ -277,8 +277,7 @@ cd web
 npm install
 cp .env.local.example .env.local
 # completa NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY / CLERK_SECRET_KEY (cuenta gratis en
-# clerk.com) y ADMIN_CLERK_USER_IDS (tu propio User ID, una vez que te hayas
-# registrado - dashboard de Clerk -> Users)
+# clerk.com) y ADMIN_EMAILS (tu correo - debe coincidir con el de tu cuenta de Clerk)
 npm run dev
 ```
 
@@ -288,9 +287,8 @@ abre [http://localhost:3000](http://localhost:3000):
 - **Panel cliente** (`/dashboard`) - requiere pertenecer a una Organization de Clerk
   (= una pyme): pauta de comité, aprobaciones, contenido pendiente, subida de
   archivos/fotos por gerencia, historial de reportes.
-- **Panel admin** (`/admin`) - requiere que tu User ID esté en `ADMIN_CLERK_USER_IDS`:
-  ingresos calculados, alta de pymes (crea sus 6 agentes de inmediato), salud de
-  integraciones.
+- **Panel admin** (`/admin`) - requiere que tu correo esté en `ADMIN_EMAILS`: ingresos
+  calculados, alta de pymes (crea sus 6 agentes de inmediato), salud de integraciones.
 
 Para dar de alta una pyme nueva: créale una Organization en el dashboard de Clerk,
 copia su Organization ID, y usa el formulario de `/admin/tenants` con ese ID.
