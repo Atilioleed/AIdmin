@@ -167,11 +167,17 @@ de Docker, para que migrar a Supabase sea solo cambiar `DATABASE_URL`.
   existe como placeholder. Sin proveedor elegido todavía; evaluar opciones (costo por
   generación, calidad, soporte de marca/plantillas) antes de comprometerse a uno -
   es una decisión de producto, no solo técnica.
-- **Plataforma web pública multi-tenant (pymes)** — evolucionar AIdmin de "herramienta
-  interna de un solo tenant" a SaaS con panel admin (ingresos, empresas afiliadas,
-  salud de integraciones, usuarios/planes) y panel cliente (comité, aprobaciones,
-  material de marketing) es un proyecto de arquitectura propio: stack de frontend,
-  multi-tenancy en el esquema de datos, autenticación, facturación/cobro (procesador
-  de pago chileno), y un modelo de precios que cubra costos reales de LLM + APIs
-  pagas por tenant. Se aborda como iniciativa separada, no como extensión incremental
-  de este sprint.
+- ~~Plataforma web pública multi-tenant~~ — **construida**: `web/` (Next.js 16 +
+  Clerk), esquema multi-tenant (`tenants`, `agents.tenant_id`), panel admin y panel
+  cliente con subida de archivos/fotos por gerencia. Ver README sección "Panel web".
+- **Cobro real a las pymes** — decisión explícita de dejarlo fuera de este sprint. El
+  admin gestiona plan/estado a mano; "ingresos" en `/admin` es `plan × pymes activas`,
+  no una pasarela real. Integrar un procesador de pago chileno (Transbank/Flow/Khipu)
+  queda para cuando corresponda facturar de verdad.
+- **E-commerce para las pymes (storefront, pasarela de pago de SUS clientes,
+  inventario) y el futuro Gerente de Operaciones** — decisión explícita de dejarlo
+  fuera de este sprint: es un proyecto casi tan grande como todo lo construido hasta
+  ahora, y "pasarela de pago" acá significa procesar dinero de terceros (los clientes
+  de cada pyme), no el gasto propio de la pyme que ya cubre el approval-gate. FIRMA IA
+  (el piloto) no tiene inventario físico, así que esto es para futuras pymes de
+  retail/e-commerce, no un bloqueante del piloto actual.

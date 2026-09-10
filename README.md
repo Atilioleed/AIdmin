@@ -18,8 +18,10 @@ Tavily), **Sofía** (Marketing, redes/contenido/campañas vía Metricool - mock 
 sprint - con su propio content-gate para que nada se publique sin revisión) y
 **Rodrigo** (CEO, lee los reportes de todos y arma la **pauta de comité** diaria —
 así es como los agentes "discuten": no chatean en vivo entre sí, el CEO cruza sus
-posiciones). Ver [`docs/architecture.md`](docs/architecture.md) para la arquitectura
-completa y cómo funciona el comité.
+posiciones). Es multi-tenant: cada pyme (Organization de Clerk) tiene su propio set de
+6 agentes, gestionado desde el panel web en [`web/`](web/) (panel admin para Atilio,
+panel cliente por pyme). Ver [`docs/architecture.md`](docs/architecture.md) para la
+arquitectura completa y cómo funciona el comité.
 
 ## Requisitos
 
@@ -263,6 +265,36 @@ curl -X POST http://localhost:4001/content-reviews/:id/approve \
   -d '{"resolvedBy": "atilio", "notes": "ok, publicar"}'
 ```
 
+## Panel web (multi-tenant, `web/`)
+
+Next.js 16 + Clerk. Cada pyme es una Organization de Clerk = un `tenant` en la base
+(cada tenant tiene su propio set de 6 agentes - ver `db/schema.sql`, `agents.tenant_id`).
+El panel **no reimplementa** la lógica de los gates: sus acciones de aprobar/rechazar
+llaman a los mismos servidores HTTP de `approval-gate`/`content-gate` que ya usa n8n.
+
+```bash
+cd web
+npm install
+cp .env.local.example .env.local
+# completa NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY / CLERK_SECRET_KEY (cuenta gratis en
+# clerk.com) y ADMIN_CLERK_USER_IDS (tu propio User ID, una vez que te hayas
+# registrado - dashboard de Clerk -> Users)
+npm run dev
+```
+
+Con Postgres, `approval-gate` y `content-gate` levantados (ver secciones de arriba),
+abre [http://localhost:3000](http://localhost:3000):
+
+- **Panel cliente** (`/dashboard`) - requiere pertenecer a una Organization de Clerk
+  (= una pyme): pauta de comité, aprobaciones, contenido pendiente, subida de
+  archivos/fotos por gerencia, historial de reportes.
+- **Panel admin** (`/admin`) - requiere que tu User ID esté en `ADMIN_CLERK_USER_IDS`:
+  ingresos calculados, alta de pymes (crea sus 6 agentes de inmediato), salud de
+  integraciones.
+
+Para dar de alta una pyme nueva: créale una Organization en el dashboard de Clerk,
+copia su Organization ID, y usa el formulario de `/admin/tenants` con ese ID.
+
 ## Estructura del repositorio
 
 ```
@@ -278,6 +310,7 @@ approval-gate/          # aprobacion humana para dinero/campañas + tests + serv
 content-gate/           # aprobacion humana para contenido publico + tests + servidor HTTP
 orchestrator/n8n/       # workflows exportados de n8n (uno por agente)
 db/                     # schema.sql, seed.sql
+web/                    # panel Next.js + Clerk (admin + cliente), multi-tenant
 docs/architecture.md    # arquitectura completa de referencia + como funciona el comite
 docker-compose.yml      # Postgres + n8n para desarrollo local
 ```
@@ -296,3 +329,7 @@ docker-compose.yml      # Postgres + n8n para desarrollo local
   transferencia; Marketing nunca publica ni lanza una campaña; Legal y Producto nunca
   publican nada - todos dejan marcas/propuestas pendientes de revisión humana vía
   approval-gate o content-gate.
+- No hay e-commerce (storefront, pasarela de pago real, inventario) ni el agente de
+  Operaciones - decisión explícita, es su propia iniciativa cuando corresponda (ver
+  `docs/architecture.md`, sección Roadmap). El panel web de gestión (`/admin`,
+  `/dashboard`) sí está construido; el cobro real a las pymes queda manual por ahora.
