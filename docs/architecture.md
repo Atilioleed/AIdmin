@@ -215,3 +215,21 @@ de Docker, para que migrar a Supabase sea solo cambiar `DATABASE_URL`.
   viven en el Gerente de Producto (ya cubre "catálogo, costos y precios"); tiene
   sentido separarlo en su propio agente cuando el volumen de ventas real (Fase 2)
   lo justifique.
+- ~~Base de conocimiento por gerente + alertas del CEO por correo~~ — **construida**:
+  `/admin/agentes/<slug>` tiene una sección para cargar documentos/links de
+  referencia globales por rol (tabla `agent_knowledge`), leída por los 6 agentes vía
+  `get_agent_knowledge_base` (`agents/_shared/agent-knowledge-tool.ts`). El CEO
+  (`agents/ceo/index.ts`) le manda un correo al dueño de la pyme (campo "Alertas por
+  correo" en `/dashboard/negocio`, columna `business_context.owner_alert_email`)
+  cuando arma la pauta y queda algo pendiente de aprobación/revisión — vía Resend
+  (`agents/_shared/email.ts`, `RESEND_API_KEY`/`RESEND_FROM_EMAIL` en `.env`). Envío
+  deshabilitado hasta que se configure una `RESEND_API_KEY` real.
+- **WhatsApp bidireccional (chat en vivo con el CEO, "hacer cambios" por WhatsApp) —
+  no implementado, solo documentado.** Requiere: un BSP (Twilio, 360dialog, o Meta
+  Cloud API directo), un webhook receptor de mensajes entrantes, mapeo
+  teléfono→tenant/sesión, y — el punto más importante — que el CEO deje de ser
+  `recommend_only` y reciba herramientas de escritura reales para poder "hacer
+  cambios" a pedido por chat. Eso último es un cambio de gobernanza (el CEO hoy no
+  puede modificar nada, solo leer y recomendar) que merece su propia conversación
+  explícita con el usuario antes de construirse — no es solo agregar una
+  integración de mensajería más.

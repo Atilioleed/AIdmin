@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AGENT_SLUGS, getAgentProfile, type AgentProfileSlug } from '../../../../../lib/agent-profiles';
+import { listAgentKnowledge } from '../../../../../lib/agent-knowledge';
 import { AgentProfileForm } from './AgentProfileForm';
+import { AgentKnowledgeSection } from './AgentKnowledgeSection';
 
 function isAgentSlug(value: string): value is AgentProfileSlug {
   return (AGENT_SLUGS as readonly string[]).includes(value);
@@ -13,6 +15,8 @@ export default async function AgentProfilePage({ params }: { params: Promise<{ s
 
   const profile = await getAgentProfile(slug);
   if (!profile) notFound();
+
+  const knowledge = await listAgentKnowledge(slug);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -31,6 +35,7 @@ export default async function AgentProfilePage({ params }: { params: Promise<{ s
       </div>
 
       <AgentProfileForm profile={profile} />
+      <AgentKnowledgeSection slug={slug} items={knowledge} />
     </div>
   );
 }

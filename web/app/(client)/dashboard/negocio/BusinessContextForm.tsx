@@ -66,6 +66,21 @@ export function BusinessContextForm({ context }: { context: BusinessContext }) {
         </div>
       ))}
 
+      <div className="border-t border-neutral-200 pt-5">
+        <label className="mb-1 block text-xs font-medium text-neutral-600">Alertas por correo</label>
+        <input
+          type="email"
+          name="ownerAlertEmail"
+          defaultValue={context.ownerAlertEmail}
+          placeholder="tu-correo@empresa.cl"
+          className="w-full rounded border border-neutral-300 px-2 py-1.5 text-sm"
+        />
+        <p className="mt-1 text-xs text-neutral-400">
+          Cuando el CEO arma la pauta del día y queda algo pendiente de revisión (aprobaciones o
+          contenido), te avisa a este correo. Déjalo vacío si no quieres recibir alertas.
+        </p>
+      </div>
+
       {error && <p className="text-xs text-red-600">{error}</p>}
       {saved && !error && <p className="text-xs text-emerald-600">Guardado.</p>}
 

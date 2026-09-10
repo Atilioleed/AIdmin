@@ -32,10 +32,15 @@ export async function saveBusinessContextAction(formData: FormData): Promise<{ e
     ? (businessTypeRaw as BusinessType)
     : '';
 
+  const ownerAlertEmail = String(formData.get('ownerAlertEmail') ?? '').trim();
+  if (ownerAlertEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ownerAlertEmail)) {
+    return { error: 'El correo de alertas no es válido.' };
+  }
+
   const user = await currentUser();
   const updatedBy = user?.primaryEmailAddress?.emailAddress ?? user?.id ?? 'usuario del panel';
 
-  await upsertBusinessContext(tenant.id, { ...values, businessType, updatedBy });
+  await upsertBusinessContext(tenant.id, { ...values, businessType, ownerAlertEmail, updatedBy });
 
   revalidatePath('/dashboard/negocio');
   revalidatePath('/dashboard');

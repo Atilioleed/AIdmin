@@ -59,6 +59,28 @@ CREATE TABLE IF NOT EXISTS agent_profiles (
   updated_by TEXT
 );
 
+-- Documentos/links de referencia que el ADMIN de la plataforma le carga a cada ROL
+-- de agente (global, no por tenant - mismo criterio que agent_profiles). Para
+-- documentos, url_or_path guarda el storage_path (reusa uploads-storage.ts); para
+-- links, guarda la URL tal cual. Leido por get_agent_knowledge_base
+-- (agents/_shared/agent-knowledge-tool.ts) - titulo/descripcion se envuelven con
+-- asUntrustedContent() antes de llegar al modelo, mismo criterio que el resto del
+-- proyecto para cualquier contenido que pueda originarse fuera del sistema.
+CREATE TABLE IF NOT EXISTS agent_knowledge (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  agent_slug TEXT NOT NULL CHECK (
+    agent_slug IN ('ceo', 'marketing', 'finanzas', 'producto', 'legal', 'desarrollo')
+  ),
+  type TEXT NOT NULL CHECK (type IN ('document', 'link')),
+  title TEXT NOT NULL,
+  url_or_path TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_knowledge_agent_slug ON agent_knowledge (agent_slug);
+
 -- Cada corrida de un agente agrupa uno o mas registros de decisions_log bajo el mismo run_id.
 CREATE TABLE IF NOT EXISTS decisions_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -172,6 +194,10 @@ CREATE TABLE IF NOT EXISTS business_context (
   innovation TEXT,
   competitors TEXT,
   scalability TEXT,
+  -- Correo del dueno de la pyme al que el CEO manda alertas cuando arma la pauta y
+  -- hay algo pendiente (aprobaciones/contenido). NULL = no manda nada. Lo carga el
+  -- cliente mismo, no el admin (ver agents/ceo/index.ts).
+  owner_alert_email TEXT,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_by TEXT
 );

@@ -4,6 +4,7 @@ import type { Pool } from 'pg';
 import { ApprovalGate } from '../../approval-gate/index.js';
 import { PgApprovalsRepository } from '../../approval-gate/pg-approvals-repository.js';
 import type { AgentTool } from '../_shared/agent.js';
+import { createGetAgentKnowledgeBaseTool } from '../_shared/agent-knowledge-tool.js';
 import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
 import { createGetClientUploadsTool } from '../_shared/uploads-tool.js';
@@ -140,5 +141,6 @@ export function createFinanzasTools(
     toGenericTool(buildProposePaymentTool(gate)),
     createGetBusinessContextTool(tenantId, pool),
     createGetClientUploadsTool(tenantId, 'finanzas', pool),
+    createGetAgentKnowledgeBaseTool('finanzas', pool),
   ];
 }

@@ -8,6 +8,7 @@ import { PgContentReviewsRepository } from '../../content-gate/pg-content-review
 import type { AgentTool } from '../_shared/agent.js';
 import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
+import { createGetAgentKnowledgeBaseTool } from '../_shared/agent-knowledge-tool.js';
 import { createGetSocialLinksTool } from '../_shared/social-links-tool.js';
 import { createGetClientUploadsTool } from '../_shared/uploads-tool.js';
 import {
@@ -232,5 +233,6 @@ export function createMarketingTools(
     createGetBusinessContextTool(tenantId, pool),
     createGetSocialLinksTool(tenantId, pool),
     createGetClientUploadsTool(tenantId, 'marketing', pool),
+    createGetAgentKnowledgeBaseTool('marketing', pool),
   ];
 }

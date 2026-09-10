@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Pool } from 'pg';
 import type { AgentTool } from '../_shared/agent.js';
+import { createGetAgentKnowledgeBaseTool } from '../_shared/agent-knowledge-tool.js';
 import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
 import { createGetClientUploadsTool } from '../_shared/uploads-tool.js';
@@ -150,5 +151,6 @@ export function createProductoTools(tenantId: string, pool: Pool = getPool()): A
     createGetBusinessContextTool(tenantId, pool),
     createGetClientUploadsTool(tenantId, 'producto', pool),
     buildListLowStockProductsTool(tenantId, pool),
+    createGetAgentKnowledgeBaseTool('producto', pool),
   ];
 }
