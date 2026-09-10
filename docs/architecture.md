@@ -78,6 +78,14 @@ cancha salvo que tenga impacto directo en otra area, y ahi lo marcas explicito")
 eso es lo que hace que sus reportes sean cruzables por el Comité en vez de
 redundantes entre si.
 
+Además de los rasgos de personalidad originales, cada gerente tiene un set de
+habilidades concretas de especialista, mapeadas desde las 14 categorías/166 skills de
+[awesome-claude-corporate-skills](https://github.com/w95/awesome-claude-corporate-skills)
+(cobertura completa de las 14, repartida entre los 6 según el rol más natural - ej.
+Finanzas también cubre Compras/Proveedores, Legal también cubre políticas de RR.HH.).
+Son bullets descriptivos, no los `SKILL.md` completos importados uno a uno - mismo
+criterio que el resto del proyecto: sustancia sobre volumen.
+
 ### El Comité: cómo "discuten" los agentes y llegan a acuerdos
 
 Los agentes NO conversan en vivo entre sí (eso requeriria un protocolo de turnos
