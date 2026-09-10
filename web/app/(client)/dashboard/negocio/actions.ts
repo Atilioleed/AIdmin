@@ -3,9 +3,9 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { getCurrentTenant } from '../../../../lib/tenant';
-import { upsertBusinessContext } from '../../../../lib/business-context';
+import { upsertBusinessContext, type BusinessType } from '../../../../lib/business-context';
 
-const FIELDS = [
+const TEXT_FIELDS = [
   'objective',
   'problem',
   'productsServices',
@@ -17,19 +17,27 @@ const FIELDS = [
   'scalability',
 ] as const;
 
+const VALID_BUSINESS_TYPES: BusinessType[] = ['producto', 'servicio', 'mixto'];
+
 export async function saveBusinessContextAction(formData: FormData): Promise<{ error?: string }> {
   const tenant = await getCurrentTenant();
   if (!tenant) return { error: 'No hay una pyme activa en esta sesion.' };
 
   const values = Object.fromEntries(
-    FIELDS.map((field) => [field, String(formData.get(field) ?? '').trim()]),
-  ) as Record<(typeof FIELDS)[number], string>;
+    TEXT_FIELDS.map((field) => [field, String(formData.get(field) ?? '').trim()]),
+  ) as Record<(typeof TEXT_FIELDS)[number], string>;
+
+  const businessTypeRaw = String(formData.get('businessType') ?? '');
+  const businessType: BusinessType = VALID_BUSINESS_TYPES.includes(businessTypeRaw as BusinessType)
+    ? (businessTypeRaw as BusinessType)
+    : '';
 
   const user = await currentUser();
   const updatedBy = user?.primaryEmailAddress?.emailAddress ?? user?.id ?? 'usuario del panel';
 
-  await upsertBusinessContext(tenant.id, { ...values, updatedBy });
+  await upsertBusinessContext(tenant.id, { ...values, businessType, updatedBy });
 
   revalidatePath('/dashboard/negocio');
+  revalidatePath('/dashboard');
   return {};
 }

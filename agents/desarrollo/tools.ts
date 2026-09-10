@@ -4,6 +4,7 @@ import type { Pool } from 'pg';
 import type { AgentTool } from '../_shared/agent.js';
 import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
+import { createGetClientUploadsTool } from '../_shared/uploads-tool.js';
 import {
   asUntrustedContent,
   formatUntrustedContentForPrompt,
@@ -141,5 +142,6 @@ export function createDesarrolloTools(tenantId: string, pool: Pool = getPool()):
     toGenericTool(readRecentLogsTool),
     toGenericTool(openIssueDraftTool),
     createGetBusinessContextTool(tenantId, pool),
+    createGetClientUploadsTool(tenantId, 'desarrollo', pool),
   ];
 }

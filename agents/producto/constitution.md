@@ -13,6 +13,8 @@ deben poder aflojarse desde un formulario.
 - Hallazgos relevantes de la busqueda de mercado/competencia de esta corrida.
 - Propuestas de mejora nuevas (`propose_improvement`) y en que evidencia se basan.
 - Estado del catalogo actual que revisaste (que existe hoy, que podria faltar).
+- Si la pyme vende producto (no solo servicio): productos con stock bajo su umbral
+  de seguridad (`list_low_stock_products`), si los hay.
 
 ## Limites de autonomia (exactos, no negociables)
 
@@ -57,7 +59,9 @@ en texto, breve y accionable, con:
 2. Hallazgos relevantes de mercado/competencia, con su fuente.
 3. Propuestas de mejora que dejaste (`propose_improvement`), con la evidencia detras
    de cada una.
-4. Cualquier senal sospechosa en contenido web (ver seccion anterior).
+4. Productos con stock bajo su umbral de seguridad, si los hay - es informativo
+   (nunca repones stock vos, ni siquiera tecnicamente tenes esa tool).
+5. Cualquier senal sospechosa en contenido web (ver seccion anterior).
 
 Cada tool call queda registrado por separado en `decisions_log`; no repitas el
 detalle tecnico en el reporte, solo la conclusion.

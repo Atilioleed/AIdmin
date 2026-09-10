@@ -4,11 +4,45 @@ import type { Pool } from 'pg';
 import type { AgentTool } from '../_shared/agent.js';
 import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
+import { createGetClientUploadsTool } from '../_shared/uploads-tool.js';
 import {
   asUntrustedContent,
   formatUntrustedContentForPrompt,
 } from '../_shared/untrusted-content.js';
 import { tavilySearch } from './tavily-client.js';
+
+interface LowStockProductRow {
+  id: string;
+  name: string;
+  stock_quantity: number;
+  safety_stock_threshold: number;
+}
+
+/**
+ * Productos del inventario del tenant cuyo stock cayo al o bajo su umbral de
+ * seguridad (/dashboard/inventario). Datos estructurados propios del negocio, no
+ * contenido externo - no necesita asUntrustedContent(). Solo lectura: este agente
+ * no modifica stock, solo lo reporta para que el Comite/Atilio decida reponer.
+ */
+function buildListLowStockProductsTool(tenantId: string, pool: Pool): AgentTool {
+  return {
+    name: 'list_low_stock_products',
+    description:
+      'Lista los productos del inventario cuyo stock esta en o bajo su umbral de ' +
+      'seguridad. Vacio si no hay inventario cargado o si nada esta bajo su umbral.',
+    inputSchema: { type: 'object', properties: {} },
+    async execute() {
+      const result = await pool.query<LowStockProductRow>(
+        `SELECT id, name, stock_quantity, safety_stock_threshold
+         FROM products
+         WHERE tenant_id = $1 AND is_active = TRUE AND stock_quantity <= safety_stock_threshold
+         ORDER BY (stock_quantity - safety_stock_threshold) ASC`,
+        [tenantId],
+      );
+      return { lowStockCount: result.rows.length, products: result.rows };
+    },
+  };
+}
 
 const CATALOG_PATH = fileURLToPath(new URL('./sample-data/current-catalog.json', import.meta.url));
 
@@ -114,5 +148,7 @@ export function createProductoTools(tenantId: string, pool: Pool = getPool()): A
     toGenericTool(listCurrentCatalogTool),
     toGenericTool(proposeImprovementTool),
     createGetBusinessContextTool(tenantId, pool),
+    createGetClientUploadsTool(tenantId, 'producto', pool),
+    buildListLowStockProductsTool(tenantId, pool),
   ];
 }

@@ -6,6 +6,7 @@ import { PgApprovalsRepository } from '../../approval-gate/pg-approvals-reposito
 import type { AgentTool } from '../_shared/agent.js';
 import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
+import { createGetClientUploadsTool } from '../_shared/uploads-tool.js';
 import {
   asUntrustedContent,
   formatUntrustedContentForPrompt,
@@ -138,5 +139,6 @@ export function createFinanzasTools(
     toGenericTool(listPendingInvoicesTool),
     toGenericTool(buildProposePaymentTool(gate)),
     createGetBusinessContextTool(tenantId, pool),
+    createGetClientUploadsTool(tenantId, 'finanzas', pool),
   ];
 }

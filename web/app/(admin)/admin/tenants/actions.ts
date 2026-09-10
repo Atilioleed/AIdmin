@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { getPool } from '../../../../lib/db';
+import { generateUniqueTenantSlug } from '../../../../lib/tenant';
 
 const AGENT_SEEDS = [
   ['desarrollo', 'Gerente de Desarrollo', 'Monitoreo de infraestructura, errores y costos de hosting.', 'act_low_risk'],
@@ -41,15 +42,16 @@ export async function createTenantAction(formData: FormData): Promise<{ error?: 
   if (!name) return { error: 'El nombre es obligatorio.' };
   if (!['piloto', 'completo', 'agencia'].includes(plan)) return { error: 'Plan invalido.' };
 
+  const slug = await generateUniqueTenantSlug(name);
   const pool = getPool();
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     const tenantResult = await client.query<{ id: string }>(
-      `INSERT INTO tenants (name, rut, plan, status, clerk_org_id)
-       VALUES ($1, $2, $3, 'trial', $4)
+      `INSERT INTO tenants (name, slug, rut, plan, status, clerk_org_id)
+       VALUES ($1, $2, $3, $4, 'trial', $5)
        RETURNING id`,
-      [name, rut, plan, clerkOrgId],
+      [name, slug, rut, plan, clerkOrgId],
     );
     const tenantId = tenantResult.rows[0]?.id;
     for (const [slug, agentName, roleDescription, autonomyLevel] of AGENT_SEEDS) {

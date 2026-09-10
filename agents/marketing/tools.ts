@@ -9,6 +9,7 @@ import type { AgentTool } from '../_shared/agent.js';
 import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
 import { createGetSocialLinksTool } from '../_shared/social-links-tool.js';
+import { createGetClientUploadsTool } from '../_shared/uploads-tool.js';
 import {
   asUntrustedContent,
   formatUntrustedContentForPrompt,
@@ -230,5 +231,6 @@ export function createMarketingTools(
     toGenericTool(buildProposeBudgetChangeTool(approvalGate)),
     createGetBusinessContextTool(tenantId, pool),
     createGetSocialLinksTool(tenantId, pool),
+    createGetClientUploadsTool(tenantId, 'marketing', pool),
   ];
 }

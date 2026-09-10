@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentTenant } from '../../../lib/tenant';
 import { getLatestReport } from '../../../lib/queries';
+import { OnboardingChecklist } from './OnboardingChecklist';
 
 export default async function DashboardPage() {
   const tenant = await getCurrentTenant();
@@ -10,6 +11,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
+      <OnboardingChecklist tenantId={tenant.id} />
       <h1 className="text-lg font-semibold text-neutral-900">Pauta de comité</h1>
       {!pauta ? (
         <p className="rounded-lg border border-dashed border-neutral-300 bg-white p-6 text-sm text-neutral-500">

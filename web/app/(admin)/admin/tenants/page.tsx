@@ -32,6 +32,7 @@ export default async function TenantsPage() {
             <thead className="border-b border-[var(--color-border)] text-xs uppercase tracking-wide text-[var(--color-ink-faint)]">
               <tr>
                 <th className="px-5 py-3 font-semibold">Nombre</th>
+                <th className="px-5 py-3 font-semibold">Sitio</th>
                 <th className="px-5 py-3 font-semibold">Plan</th>
                 <th className="px-5 py-3 font-semibold">Estado</th>
                 <th className="px-5 py-3 font-semibold">Clerk Org</th>
@@ -41,7 +42,7 @@ export default async function TenantsPage() {
             <tbody>
               {tenants.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-[var(--color-ink-faint)]">
+                  <td colSpan={6} className="px-5 py-8 text-center text-[var(--color-ink-faint)]">
                     Todavía no hay pymes afiliadas — crea la primera arriba.
                   </td>
                 </tr>
@@ -51,6 +52,9 @@ export default async function TenantsPage() {
                 return (
                   <tr key={t.id} className="border-b border-[var(--color-border-soft)] transition-colors last:border-0 hover:bg-[var(--color-surface-sunken)]">
                     <td className="px-5 py-3 font-medium text-[var(--color-ink)]">{t.name}</td>
+                    <td className="px-5 py-3 font-mono text-xs text-[var(--color-ink-faint)]">
+                      {t.slug ? `/sitio/${t.slug}` : '—'}
+                    </td>
                     <td className="px-5 py-3 text-[var(--color-ink-soft)]">{PLAN_LABELS[t.plan]}</td>
                     <td className="px-5 py-3">
                       <span

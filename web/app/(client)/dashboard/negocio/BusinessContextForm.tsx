@@ -36,6 +36,23 @@ export function BusinessContextForm({ context }: { context: BusinessContext }) {
 
   return (
     <form action={handleSubmit} className="flex flex-col gap-5 rounded-lg border border-neutral-200 bg-white p-5">
+      <div>
+        <label className="mb-1 block text-xs font-medium text-neutral-600">¿Qué vendes?</label>
+        <select
+          name="businessType"
+          defaultValue={context.businessType}
+          className="w-full rounded border border-neutral-300 px-2 py-1.5 text-sm"
+        >
+          <option value="">Selecciona una opción</option>
+          <option value="producto">Producto (maneja inventario/stock)</option>
+          <option value="servicio">Servicio (sin inventario)</option>
+          <option value="mixto">Ambos</option>
+        </select>
+        <p className="mt-1 text-xs text-neutral-400">
+          Si vendes producto, se habilita la sección de Inventario en tu panel.
+        </p>
+      </div>
+
       {FIELDS.map((field) => (
         <div key={field.name}>
           <label className="mb-1 block text-xs font-medium text-neutral-600">{field.label}</label>

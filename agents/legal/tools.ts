@@ -4,6 +4,7 @@ import type { Pool } from 'pg';
 import type { AgentTool } from '../_shared/agent.js';
 import { createGetBusinessContextTool } from '../_shared/business-context-tool.js';
 import { getPool } from '../_shared/db.js';
+import { createGetClientUploadsTool } from '../_shared/uploads-tool.js';
 
 const DOCUMENT_TEMPLATES_PATH = fileURLToPath(
   new URL('./sample-data/document-templates.json', import.meta.url),
@@ -88,5 +89,6 @@ export function createLegalTools(tenantId: string, pool: Pool = getPool()): Agen
     toGenericTool(getLegalReferenceChecklistTool),
     toGenericTool(flagDocumentForLegalReviewTool),
     createGetBusinessContextTool(tenantId, pool),
+    createGetClientUploadsTool(tenantId, 'legal', pool),
   ];
 }

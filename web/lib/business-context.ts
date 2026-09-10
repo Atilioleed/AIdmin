@@ -1,6 +1,9 @@
 import { getPool } from './db';
 
+export type BusinessType = 'producto' | 'servicio' | 'mixto' | '';
+
 export interface BusinessContext {
+  businessType: BusinessType;
   objective: string;
   problem: string;
   productsServices: string;
@@ -15,6 +18,7 @@ export interface BusinessContext {
 }
 
 interface BusinessContextRow {
+  business_type: BusinessType | null;
   objective: string | null;
   problem: string | null;
   products_services: string | null;
@@ -29,6 +33,7 @@ interface BusinessContextRow {
 }
 
 const EMPTY: BusinessContext = {
+  businessType: '',
   objective: '',
   problem: '',
   productsServices: '',
@@ -44,6 +49,7 @@ const EMPTY: BusinessContext = {
 
 function toBusinessContext(row: BusinessContextRow): BusinessContext {
   return {
+    businessType: row.business_type ?? '',
     objective: row.objective ?? '',
     problem: row.problem ?? '',
     productsServices: row.products_services ?? '',
@@ -60,7 +66,7 @@ function toBusinessContext(row: BusinessContextRow): BusinessContext {
 
 export async function getBusinessContext(tenantId: string): Promise<BusinessContext> {
   const result = await getPool().query<BusinessContextRow>(
-    `SELECT objective, problem, products_services, target_market, revenue_model,
+    `SELECT business_type, objective, problem, products_services, target_market, revenue_model,
             capital_stock, innovation, competitors, scalability, updated_at, updated_by
      FROM business_context WHERE tenant_id = $1`,
     [tenantId],
@@ -70,6 +76,7 @@ export async function getBusinessContext(tenantId: string): Promise<BusinessCont
 }
 
 export interface BusinessContextInput {
+  businessType: BusinessType;
   objective: string;
   problem: string;
   productsServices: string;
@@ -85,10 +92,11 @@ export interface BusinessContextInput {
 export async function upsertBusinessContext(tenantId: string, input: BusinessContextInput): Promise<void> {
   await getPool().query(
     `INSERT INTO business_context
-       (tenant_id, objective, problem, products_services, target_market, revenue_model,
+       (tenant_id, business_type, objective, problem, products_services, target_market, revenue_model,
         capital_stock, innovation, competitors, scalability, updated_by)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
      ON CONFLICT (tenant_id) DO UPDATE SET
+       business_type = EXCLUDED.business_type,
        objective = EXCLUDED.objective,
        problem = EXCLUDED.problem,
        products_services = EXCLUDED.products_services,
@@ -101,6 +109,7 @@ export async function upsertBusinessContext(tenantId: string, input: BusinessCon
        updated_by = EXCLUDED.updated_by`,
     [
       tenantId,
+      input.businessType || null,
       input.objective,
       input.problem,
       input.productsServices,

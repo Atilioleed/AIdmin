@@ -5,8 +5,8 @@
 -- `name` no tiene constraint unica (dos pymes distintas podrian compartir razon
 -- social), asi que ON CONFLICT no detecta este caso - se guarda explicito con
 -- WHERE NOT EXISTS para que re-correr el seed no duplique el tenant piloto.
-INSERT INTO tenants (name, rut, plan, status)
-SELECT 'FIRMA IA SpA', NULL, 'completo', 'active'
+INSERT INTO tenants (name, slug, rut, plan, status)
+SELECT 'FIRMA IA SpA', 'firma-ia', NULL, 'completo', 'active'
 WHERE NOT EXISTS (SELECT 1 FROM tenants WHERE name = 'FIRMA IA SpA');
 
 INSERT INTO agents (tenant_id, slug, name, role_description, autonomy_level, is_active)
@@ -144,4 +144,22 @@ VALUES
     ],
     'Mantener visibilidad continua sobre la salud tecnica de FIRMA IA (disponibilidad, errores, costos de hosting) y actuar de inmediato solo en lo que es seguro actuar sin supervision, escalando todo lo demas.'
   )
+ON CONFLICT (slug) DO NOTHING;
+
+-- Catalogo de las 10 plantillas de sitio web (ver web/components/site-templates/registry.ts
+-- para la composicion real de secciones/paleta de cada una). preview_image_url queda
+-- NULL por ahora - no hay pipeline de assets estaticos todavia; el picker del panel
+-- cliente renderiza una muestra en CSS en su lugar.
+INSERT INTO website_templates (slug, name, description, category, display_order)
+VALUES
+  ('minimal-studio', 'Minimal Studio', 'Tipografia grande, mucho espacio en blanco - para consultoria y estudios creativos.', 'servicios', 1),
+  ('retail-catalogo', 'Retail Catálogo', 'Grilla de productos por delante - para negocios que venden productos físicos.', 'retail', 2),
+  ('gastronomia', 'Gastronomía', 'Estilo carta de menú, imagen-primero - para restaurantes y cafés.', 'gastronomia', 3),
+  ('servicios-profesionales', 'Servicios Profesionales', 'Construye confianza: credenciales, testimonios y llamado a la acción claro.', 'servicios', 4),
+  ('boutique', 'Boutique', 'Elegante, foco en fotografía de estilo de vida - para marcas de moda/diseño.', 'retail', 5),
+  ('salud-bienestar', 'Salud & Bienestar', 'Paleta calma, llamado a reservar hora en el centro de la página.', 'servicios', 6),
+  ('inmobiliaria', 'Inmobiliaria', 'Grilla de propiedades/listados con ficha destacada.', 'inmobiliaria', 7),
+  ('educacion-cursos', 'Educación & Cursos', 'Tarjetas de curso con llamado a inscribirse.', 'educacion', 8),
+  ('eventos', 'Eventos', 'Hero grande tipo landing, pensado para un evento o lanzamiento puntual.', 'eventos', 9),
+  ('portafolio-creativo', 'Portafolio Creativo', 'Galería de imágenes por delante, texto mínimo - para fotógrafos y diseñadores.', 'creativo', 10)
 ON CONFLICT (slug) DO NOTHING;

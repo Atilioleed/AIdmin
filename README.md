@@ -285,8 +285,11 @@ Con Postgres, `approval-gate` y `content-gate` levantados (ver secciones de arri
 abre [http://localhost:3000](http://localhost:3000):
 
 - **Panel cliente** (`/dashboard`) - requiere pertenecer a una Organization de Clerk
-  (= una pyme): pauta de comité, aprobaciones, contenido pendiente, subida de
-  archivos/fotos por gerencia, historial de reportes.
+  (= una pyme): checklist de onboarding, pauta de comité, contexto de negocio
+  (`/dashboard/negocio`, leído por los 6 gerentes), sitio web (`/dashboard/sitio`,
+  10 plantillas + colores/info básica, publica en `/sitio/<slug>`), inventario
+  (`/dashboard/inventario`, si la pyme vende producto), redes sociales, aprobaciones,
+  contenido pendiente, subida de archivos/fotos por gerencia, historial de reportes.
 - **Panel admin** (`/admin`) - requiere que tu correo esté en `ADMIN_EMAILS`: ingresos
   calculados, alta de pymes (crea sus 6 agentes de inmediato), salud de integraciones,
   y personalidad/habilidades de cada gerente (`/admin/agentes`).
@@ -335,7 +338,12 @@ docker-compose.yml      # Postgres + n8n para desarrollo local
   transferencia; Marketing nunca publica ni lanza una campaña; Legal y Producto nunca
   publican nada - todos dejan marcas/propuestas pendientes de revisión humana vía
   approval-gate o content-gate.
-- No hay e-commerce (storefront, pasarela de pago real, inventario) ni el agente de
-  Operaciones - decisión explícita, es su propia iniciativa cuando corresponda (ver
-  `docs/architecture.md`, sección Roadmap). El panel web de gestión (`/admin`,
-  `/dashboard`) sí está construido; el cobro real a las pymes queda manual por ahora.
+- Sitio web (10 plantillas) e inventario para las pymes SÍ están construidos
+  (`/dashboard/sitio`, `/dashboard/inventario`). Lo que sigue sin construir es el
+  dinero real: pasarela de pago de terceros (los clientes de cada pyme), envíos, y
+  el dashboard financiero que depende de esas ventas reales - decisión explícita,
+  investigado y documentado (Mercado Pago Marketplace API) pero no implementado
+  todavía (ver `docs/architecture.md`, sección Roadmap). Tampoco hay un Gerente de
+  Operaciones dedicado - las alertas de stock bajo viven en Producto por ahora. El
+  cobro real a las pymes (el fee mensual de AIdmin, no las ventas de sus clientes)
+  también queda manual.

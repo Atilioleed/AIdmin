@@ -7,6 +7,7 @@
 CREATE TABLE IF NOT EXISTS tenants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL, -- razon social
+  slug TEXT UNIQUE, -- identificador amigable para la URL publica del sitio (/sitio/<slug>)
   rut TEXT,
   plan TEXT NOT NULL DEFAULT 'piloto' CHECK (plan IN ('piloto', 'completo', 'agencia')),
   status TEXT NOT NULL DEFAULT 'trial' CHECK (
@@ -160,6 +161,8 @@ CREATE INDEX IF NOT EXISTS idx_client_uploads_tenant_id ON client_uploads (tenan
 -- se pasa crudo al modelo.
 CREATE TABLE IF NOT EXISTS business_context (
   tenant_id UUID PRIMARY KEY REFERENCES tenants (id) ON DELETE CASCADE,
+  -- Gatilla si /dashboard/inventario aplica (una pyme de puro servicio no maneja stock).
+  business_type TEXT CHECK (business_type IN ('producto', 'servicio', 'mixto')),
   objective TEXT,
   problem TEXT,
   products_services TEXT,
@@ -191,6 +194,57 @@ CREATE TABLE IF NOT EXISTS social_links (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_by TEXT
 );
+
+-- Catalogo fijo de plantillas de sitio web (datos, no config hardcodeada en cada
+-- componente - asi el catalogo se puede ampliar sin tocar codigo). Sembrado por
+-- db/seed.sql. Ver web/components/site-templates/registry.ts para el mapeo de
+-- cada slug a su composicion real de secciones/paleta por defecto.
+CREATE TABLE IF NOT EXISTS website_templates (
+  slug TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  preview_image_url TEXT,
+  category TEXT NOT NULL,
+  display_order INTEGER NOT NULL DEFAULT 0
+);
+
+-- El sitio publico de cada pyme - un sitio por tenant en esta fase. La plantilla
+-- elegida + personalizacion de colores/info basica vive aca; el contenido real
+-- (about, productos, contacto) se arma en runtime reusando business_context,
+-- products y social_links - no se duplica el dato.
+CREATE TABLE IF NOT EXISTS tenant_websites (
+  tenant_id UUID PRIMARY KEY REFERENCES tenants (id) ON DELETE CASCADE,
+  template_slug TEXT NOT NULL REFERENCES website_templates (slug),
+  business_name_override TEXT,
+  tagline TEXT,
+  logo_storage_path TEXT,
+  color_primary TEXT NOT NULL DEFAULT '#6a4cff',
+  color_secondary TEXT NOT NULL DEFAULT '#ff8a5b',
+  color_background TEXT NOT NULL DEFAULT '#ffffff',
+  published BOOLEAN NOT NULL DEFAULT FALSE,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by TEXT
+);
+
+-- Inventario de la pyme - solo aplica si business_context.business_type declara
+-- 'producto' o 'mixto'. Precio en CLP entero (sin decimales, igual que el resto
+-- del proyecto - ver lib/plans.ts). safety_stock_threshold habilita
+-- list_low_stock_products (agents/producto/tools.ts).
+CREATE TABLE IF NOT EXISTS products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  price_clp INTEGER NOT NULL CHECK (price_clp >= 0),
+  stock_quantity INTEGER NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+  safety_stock_threshold INTEGER NOT NULL DEFAULT 0 CHECK (safety_stock_threshold >= 0),
+  photo_storage_paths TEXT[] NOT NULL DEFAULT '{}',
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_products_tenant_id ON products (tenant_id);
 
 -- Mantiene *.updated_at al dia sin logica extra en el codigo de la app.
 CREATE OR REPLACE FUNCTION set_updated_at()
@@ -228,5 +282,17 @@ CREATE TRIGGER trg_business_context_updated_at
 DROP TRIGGER IF EXISTS trg_social_links_updated_at ON social_links;
 CREATE TRIGGER trg_social_links_updated_at
   BEFORE UPDATE ON social_links
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_tenant_websites_updated_at ON tenant_websites;
+CREATE TRIGGER trg_tenant_websites_updated_at
+  BEFORE UPDATE ON tenant_websites
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_products_updated_at ON products;
+CREATE TRIGGER trg_products_updated_at
+  BEFORE UPDATE ON products
   FOR EACH ROW
   EXECUTE FUNCTION set_updated_at();

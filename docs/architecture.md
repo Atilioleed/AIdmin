@@ -180,10 +180,30 @@ de Docker, para que migrar a Supabase sea solo cambiar `DATABASE_URL`.
   admin gestiona plan/estado a mano; "ingresos" en `/admin` es `plan × pymes activas`,
   no una pasarela real. Integrar un procesador de pago chileno (Transbank/Flow/Khipu)
   queda para cuando corresponda facturar de verdad.
-- **E-commerce para las pymes (storefront, pasarela de pago de SUS clientes,
-  inventario) y el futuro Gerente de Operaciones** — decisión explícita de dejarlo
-  fuera de este sprint: es un proyecto casi tan grande como todo lo construido hasta
-  ahora, y "pasarela de pago" acá significa procesar dinero de terceros (los clientes
-  de cada pyme), no el gasto propio de la pyme que ya cubre el approval-gate. FIRMA IA
-  (el piloto) no tiene inventario físico, así que esto es para futuras pymes de
-  retail/e-commerce, no un bloqueante del piloto actual.
+- ~~Sitio web + inventario para las pymes~~ — **construida (Fase 1)**: 10 plantillas
+  de sitio (`web/components/site-templates/`, catálogo en `website_templates`),
+  editor de colores/info básica en `/dashboard/sitio`, sitio público en
+  `/sitio/<slug>`, inventario con stock/precio/fotos en `/dashboard/inventario`
+  (tabla `products`), y `list_low_stock_products` avisando al Gerente de Producto
+  cuando algo cae bajo su umbral de seguridad. De paso se cerró un gap real: la
+  tabla `client_uploads` existía sin que ningún agente la leyera —
+  `get_client_uploads` (agents/_shared/uploads-tool.ts) ya está conectada a los 6.
+- **Pago real de terceros (dinero de LOS CLIENTES de cada pyme) + envíos + dashboard
+  financiero real — Fase 2, todavía no construida.** Investigado: **Mercado Pago
+  Marketplace/Application API** es la opción confirmada con OAuth por vendedor +
+  `marketplace_fee` automático para Chile (Transbank Webpay Mall existe pero es
+  onboarding comercial pesado, no self-serve; Flow/Khipu sin marketplace confirmado).
+  Para envíos, agregadores como Enviame.io/Shipit.cl (multi-courier, una sola
+  integración) además de APIs directas de Chilexpress/Correos de Chile/Bluexpress.
+  Motivo de dejarlo aparte: procesar dinero de terceros exige tokens OAuth cifrados
+  en reposo, verificación de webhooks, y que el usuario cree su propia app de
+  desarrollador en Mercado Pago primero — más una sesión dedicada que una extensión
+  de lo demás. **Nota para el pitch**: el `marketplace_fee` de Mercado Pago le daría
+  a AIdmin una segunda fuente de ingresos (comisión % sobre el GMV que procesan sus
+  pymes) además del fee mensual fijo — no solo un SaaS de asiento fijo, sino uno con
+  techo de ingresos ligado al éxito de ventas de sus clientes. No comprometido
+  todavía, solo documentado.
+- **Un futuro Gerente de Operaciones dedicado** — por ahora las alertas de stock
+  viven en el Gerente de Producto (ya cubre "catálogo, costos y precios"); tiene
+  sentido separarlo en su propio agente cuando el volumen de ventas real (Fase 2)
+  lo justifique.

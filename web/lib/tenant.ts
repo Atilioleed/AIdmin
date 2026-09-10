@@ -4,6 +4,7 @@ import { getPool } from './db';
 export interface TenantRecord {
   id: string;
   name: string;
+  slug: string | null;
   rut: string | null;
   plan: 'piloto' | 'completo' | 'agencia';
   status: 'trial' | 'active' | 'paused' | 'cancelled';
@@ -14,6 +15,7 @@ export interface TenantRecord {
 function toTenant(row: {
   id: string;
   name: string;
+  slug: string | null;
   rut: string | null;
   plan: TenantRecord['plan'];
   status: TenantRecord['status'];
@@ -23,6 +25,7 @@ function toTenant(row: {
   return {
     id: row.id,
     name: row.name,
+    slug: row.slug,
     rut: row.rut,
     plan: row.plan,
     status: row.status,
@@ -30,6 +33,8 @@ function toTenant(row: {
     createdAt: row.created_at,
   };
 }
+
+const SELECT_COLUMNS = 'id, name, slug, rut, plan, status, clerk_org_id, created_at';
 
 /**
  * Resuelve el tenant de la sesion actual a partir de la Organization activa de
@@ -39,19 +44,40 @@ function toTenant(row: {
 export async function getCurrentTenant(): Promise<TenantRecord | null> {
   const { orgId } = await auth();
   if (!orgId) return null;
-  const result = await getPool().query(
-    'SELECT id, name, rut, plan, status, clerk_org_id, created_at FROM tenants WHERE clerk_org_id = $1',
-    [orgId],
-  );
+  const result = await getPool().query(`SELECT ${SELECT_COLUMNS} FROM tenants WHERE clerk_org_id = $1`, [orgId]);
   const row = result.rows[0] as Parameters<typeof toTenant>[0] | undefined;
   return row ? toTenant(row) : null;
 }
 
 export async function listTenants(): Promise<TenantRecord[]> {
-  const result = await getPool().query(
-    'SELECT id, name, rut, plan, status, clerk_org_id, created_at FROM tenants ORDER BY created_at DESC',
-  );
+  const result = await getPool().query(`SELECT ${SELECT_COLUMNS} FROM tenants ORDER BY created_at DESC`);
   return (result.rows as Parameters<typeof toTenant>[0][]).map(toTenant);
+}
+
+// slug amigable para /sitio/<slug> - minusculas, guiones, sin acentos. Se genera
+// al crear la pyme desde /admin/tenants; si ya existe, se le agrega un sufijo
+// numerico hasta encontrar uno libre.
+function slugify(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // quita acentos (ej. "Panaderia" -> "Panaderia")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 60);
+}
+
+export async function generateUniqueTenantSlug(name: string): Promise<string> {
+  const base = slugify(name) || 'pyme';
+  const pool = getPool();
+  let candidate = base;
+  let suffix = 2;
+  while (true) {
+    const result = await pool.query('SELECT 1 FROM tenants WHERE slug = $1', [candidate]);
+    if (result.rowCount === 0) return candidate;
+    candidate = `${base}-${suffix}`;
+    suffix += 1;
+  }
 }
 
 // Los admin de plataforma se identifican por correo, no por Clerk user ID (mas facil
