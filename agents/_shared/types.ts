@@ -1,6 +1,6 @@
 // Tipos compartidos por todos los agentes y por approval-gate.
 
-export type AgentSlug = 'ceo' | 'marketing' | 'finanzas' | 'producto' | 'desarrollo';
+export type AgentSlug = 'ceo' | 'marketing' | 'finanzas' | 'producto' | 'desarrollo' | 'legal';
 
 export type AutonomyLevel = 'recommend_only' | 'propose_only' | 'act_low_risk' | 'act_with_gate';
 
