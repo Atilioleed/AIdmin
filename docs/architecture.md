@@ -155,3 +155,23 @@ por medio — el agente la detecta y la reporta como anomalía en vez de propone
 El esquema (`db/schema.sql`) usa tipos y funciones nativas de Postgres estándar
 (`gen_random_uuid()`, `TIMESTAMPTZ`, `JSONB`, triggers `plpgsql`) sin nada específico
 de Docker, para que migrar a Supabase sea solo cambiar `DATABASE_URL`.
+
+## Roadmap: pendientes explícitos, no descuidos
+
+- **Metricool real** — `METRICOOL_API_KEY` ya existe en `.env.example`/`.env` (vacía).
+  Falta construir `agents/marketing/metricool-client.ts` (mismo patrón que
+  `agents/producto/tavily-client.ts`: un cliente delgado + envolver cualquier texto
+  externo con `asUntrustedContent()`) y decidir el alcance exacto de la API antes de
+  conectarlo.
+- **Generación de creatividades (imágenes/video para ads)** — `CREATIVE_GENERATION_API_KEY`
+  existe como placeholder. Sin proveedor elegido todavía; evaluar opciones (costo por
+  generación, calidad, soporte de marca/plantillas) antes de comprometerse a uno -
+  es una decisión de producto, no solo técnica.
+- **Plataforma web pública multi-tenant (pymes)** — evolucionar AIdmin de "herramienta
+  interna de un solo tenant" a SaaS con panel admin (ingresos, empresas afiliadas,
+  salud de integraciones, usuarios/planes) y panel cliente (comité, aprobaciones,
+  material de marketing) es un proyecto de arquitectura propio: stack de frontend,
+  multi-tenancy en el esquema de datos, autenticación, facturación/cobro (procesador
+  de pago chileno), y un modelo de precios que cubra costos reales de LLM + APIs
+  pagas por tenant. Se aborda como iniciativa separada, no como extensión incremental
+  de este sprint.
