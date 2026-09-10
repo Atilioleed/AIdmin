@@ -20,7 +20,10 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', 'orchestrator/n8n/**'],
+    // web/ es su propio proyecto Next.js con su propio eslint.config.mjs (y su propia
+    // copia de eslint-plugin-react) - lintarlo desde aca choca de version. Se lintea
+    // por separado con `npm run lint` dentro de web/.
+    ignores: ['dist/**', 'node_modules/**', 'orchestrator/n8n/**', 'web/**'],
   },
   eslintConfigPrettier,
 );

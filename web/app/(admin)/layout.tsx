@@ -8,6 +8,7 @@ import { AnimatedMain } from './AnimatedMain';
 
 export const NAV_ITEMS = [
   { href: '/admin', label: 'Resumen', icon: 'home' as const },
+  { href: '/admin/agentes', label: 'Gerentes IA', icon: 'sparkles' as const },
   { href: '/admin/tenants', label: 'Pymes', icon: 'building' as const },
   { href: '/admin/integrations', label: 'Integraciones', icon: 'pulse' as const },
 ];

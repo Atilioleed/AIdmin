@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import Anthropic from '@anthropic-ai/sdk';
 import type { Pool } from 'pg';
 import { getPool } from './db.js';
+import { loadAgentProfile, formatAgentProfileForPrompt } from './agent-profile.js';
 import type { AgentSlug, DecisionType } from './types.js';
 
 export interface AgentToolContext {
@@ -71,18 +72,23 @@ export class Agent {
   private readonly config: AgentConfig;
   private readonly anthropic: Anthropic;
   private readonly pool: Pool;
-  private readonly constitution: string;
+  // Mitad FIJA del system prompt: limites de autonomia, contenido externo = dato,
+  // formato del reporte. Nunca editable desde el panel admin - ver agent-profile.ts
+  // para la mitad editable (personalidad/habilidades/objetivo, cargada por run()).
+  private readonly fixedConstitution: string;
 
   constructor(config: AgentConfig, deps: { anthropic?: Anthropic; pool?: Pool } = {}) {
     this.config = config;
     this.anthropic = deps.anthropic ?? new Anthropic();
     this.pool = deps.pool ?? getPool();
-    this.constitution = readFileSync(config.constitutionPath, 'utf8');
+    this.fixedConstitution = readFileSync(config.constitutionPath, 'utf8');
   }
 
   async run(userContext: string): Promise<AgentRunResult> {
     const runId = randomUUID();
     const agentId = await this.getAgentId();
+    const profile = await loadAgentProfile(this.pool, this.config.slug);
+    const system = `${formatAgentProfileForPrompt(profile)}\n\n---\n\n${this.fixedConstitution}`;
     const model = this.config.model ?? process.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
     const maxTokens = this.config.maxTokens ?? DEFAULT_MAX_TOKENS;
     const maxIterations = this.config.maxToolIterations ?? DEFAULT_MAX_TOOL_ITERATIONS;
@@ -101,7 +107,7 @@ export class Agent {
       const response = await this.anthropic.messages.create({
         model,
         max_tokens: maxTokens,
-        system: this.constitution,
+        system,
         messages,
         tools,
       });

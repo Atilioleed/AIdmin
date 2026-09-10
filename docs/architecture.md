@@ -63,10 +63,16 @@ campaña con presupuesto moderado y bien fundamentado, vía el flujo normal.
 
 ### Personalidad: por qué cada agente "suena" distinto
 
-Cada `constitution.md` tiene una sección **Personalidad y especialidad** con un
-nombre propio, un trasfondo profesional concreto (SRE para Mauricio, contadora para
-Valentina, abogada para Francisca, estratega de producto para Camila, generalista de
-negocio para Rodrigo) y 3-4 rasgos observables en como redactan sus reportes. La
+La personalidad de cada agente (nombre propio, trasfondo profesional concreto - SRE
+para Mauricio, contadora para Valentina, abogada para Francisca, estratega de
+producto para Camila, generalista de negocio para Rodrigo -, habilidades y objetivo)
+ya NO vive hardcodeada en `constitution.md`: vive en la tabla `agent_profiles`
+(global por rol, no por tenant) y es editable desde `/admin/agentes` sin tocar
+código ni redesplegar. `Agent.run()` arma el system prompt completo concatenando esa
+mitad editable (`agents/_shared/agent-profile.ts`) con la mitad fija que sí sigue en
+cada `constitution.md`: límites de autonomía y reglas de gobernanza, deliberadamente
+protegidas de edición desde el panel para que nadie afloje sin querer una regla de
+seguridad (aprobación humana de plata/contenido público) desde un formulario. La
 personalidad no es cosmética: define tambien el alcance ("no opinas fuera de tu
 cancha salvo que tenga impacto directo en otra area, y ahi lo marcas explicito") -
 eso es lo que hace que sus reportes sean cruzables por el Comité en vez de

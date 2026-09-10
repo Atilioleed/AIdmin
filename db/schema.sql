@@ -38,6 +38,26 @@ CREATE TABLE IF NOT EXISTS agents (
 
 CREATE INDEX IF NOT EXISTS idx_agents_tenant_id ON agents (tenant_id);
 
+-- Personalidad y habilidades de cada ROL de agente (no por tenant - las 6 pymes
+-- comparten el mismo "Marketing", editable desde /admin/agentes). Separado a
+-- proposito de los limites de autonomia y reglas de gobernanza, que siguen viviendo
+-- solo en agents/<slug>/constitution.md: este panel nunca debe poder aflojar una
+-- regla de seguridad (aprobacion humana de plata/contenido publico), solo como el
+-- agente se presenta y que habilidades tiene declaradas.
+CREATE TABLE IF NOT EXISTS agent_profiles (
+  slug TEXT PRIMARY KEY CHECK (
+    slug IN ('ceo', 'marketing', 'finanzas', 'producto', 'legal', 'desarrollo')
+  ),
+  persona_name TEXT NOT NULL, -- "Sofia"
+  display_name TEXT NOT NULL, -- "Gerente de Marketing"
+  personality TEXT NOT NULL DEFAULT '',
+  skills TEXT[] NOT NULL DEFAULT '{}',
+  objective TEXT NOT NULL DEFAULT '',
+  extra_instructions TEXT, -- notas libres del admin, se suman al system prompt tal cual
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by TEXT
+);
+
 -- Cada corrida de un agente agrupa uno o mas registros de decisions_log bajo el mismo run_id.
 CREATE TABLE IF NOT EXISTS decisions_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -149,5 +169,11 @@ CREATE TRIGGER trg_agents_updated_at
 DROP TRIGGER IF EXISTS trg_tenants_updated_at ON tenants;
 CREATE TRIGGER trg_tenants_updated_at
   BEFORE UPDATE ON tenants
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_agent_profiles_updated_at ON agent_profiles;
+CREATE TRIGGER trg_agent_profiles_updated_at
+  BEFORE UPDATE ON agent_profiles
   FOR EACH ROW
   EXECUTE FUNCTION set_updated_at();

@@ -28,6 +28,17 @@ const ICONS: Record<string, React.ReactNode> = {
       strokeLinejoin="round"
     />
   ),
+  sparkles: (
+    <>
+      <path
+        d="M11 4.5 12.4 8.6 16.5 10 12.4 11.4 11 15.5 9.6 11.4 5.5 10 9.6 8.6 11 4.5Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path d="M17.5 14.5 18.3 16.7 20.5 17.5 18.3 18.3 17.5 20.5 16.7 18.3 14.5 17.5 16.7 16.7 17.5 14.5Z" fill="currentColor" />
+    </>
+  ),
 };
 
 export function AdminNav({ items }: { items: { href: string; label: string; icon: keyof typeof ICONS }[] }) {

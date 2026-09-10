@@ -288,10 +288,18 @@ abre [http://localhost:3000](http://localhost:3000):
   (= una pyme): pauta de comité, aprobaciones, contenido pendiente, subida de
   archivos/fotos por gerencia, historial de reportes.
 - **Panel admin** (`/admin`) - requiere que tu correo esté en `ADMIN_EMAILS`: ingresos
-  calculados, alta de pymes (crea sus 6 agentes de inmediato), salud de integraciones.
+  calculados, alta de pymes (crea sus 6 agentes de inmediato), salud de integraciones,
+  y personalidad/habilidades de cada gerente (`/admin/agentes`).
 
 Para dar de alta una pyme nueva: créale una Organization en el dashboard de Clerk,
 copia su Organization ID, y usa el formulario de `/admin/tenants` con ese ID.
+
+Para editar la personalidad y habilidades de un gerente (nombre, tono, especialidad,
+objetivo): `/admin/agentes/<slug>`. Es global por rol - un solo "Marketing" aplica a
+todas las pymes. Los límites de autonomía (aprobación humana de plata y contenido
+público) NO se editan ahí: siguen fijos en `agents/<slug>/constitution.md` por
+seguridad, y se combinan con lo editable en `agents/_shared/agent.ts` en cada corrida
+(ver `agents/_shared/agent-profile.ts`).
 
 ## Estructura del repositorio
 
