@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { fileURLToPath } from 'node:url';
 import { Agent, type AgentRunResult } from '../_shared/agent.js';
 import { createLlmClient } from '../_shared/llm-client-factory.js';
+import { resolveTenantId } from '../_shared/tenant.js';
 import { createMarketingTools } from './tools.js';
 
 const CONSTITUTION_PATH = fileURLToPath(new URL('./constitution.md', import.meta.url));
@@ -17,9 +18,10 @@ tipos de propuesta quedan pendientes de aprobacion humana - nunca publiques ni
 ejecutes nada tu misma. Termina con tu reporte segun el formato de tu constitucion.
 `.trim();
 
-export async function runMarketingAgent(): Promise<AgentRunResult> {
+export async function runMarketingAgent(tenantId?: string): Promise<AgentRunResult> {
   const agent = new Agent(
     {
+      tenantId: resolveTenantId(tenantId),
       slug: 'marketing',
       constitutionPath: CONSTITUTION_PATH,
       tools: createMarketingTools(),

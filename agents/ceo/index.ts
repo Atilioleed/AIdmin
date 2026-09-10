@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { fileURLToPath } from 'node:url';
 import { Agent, type AgentRunResult } from '../_shared/agent.js';
 import { createLlmClient } from '../_shared/llm-client-factory.js';
+import { resolveTenantId } from '../_shared/tenant.js';
 import { createCeoTools } from './tools.js';
 
 const CONSTITUTION_PATH = fileURLToPath(new URL('./constitution.md', import.meta.url));
@@ -15,12 +16,14 @@ aunque no hayan hablado directamente entre si. Termina con la pauta completa seg
 el formato de tu constitucion.
 `.trim();
 
-export async function runCeoAgent(): Promise<AgentRunResult> {
+export async function runCeoAgent(tenantId?: string): Promise<AgentRunResult> {
+  const resolvedTenantId = resolveTenantId(tenantId);
   const agent = new Agent(
     {
+      tenantId: resolvedTenantId,
       slug: 'ceo',
       constitutionPath: CONSTITUTION_PATH,
-      tools: createCeoTools(),
+      tools: createCeoTools(resolvedTenantId),
     },
     { anthropic: createLlmClient() },
   );

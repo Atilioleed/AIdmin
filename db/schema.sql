@@ -1,10 +1,28 @@
--- AIdmin - esquema base de datos (Fase 0)
+-- AIdmin - esquema base de datos
 -- Disenado para Postgres 18 local (Docker) hoy, Supabase en produccion.
 -- gen_random_uuid() es nativo desde Postgres 15, no requiere extension.
 
+-- Una fila por pyme cliente de la plataforma. clerk_org_id vincula con la
+-- Organization de Clerk que agrupa a los usuarios de esa pyme (panel cliente).
+CREATE TABLE IF NOT EXISTS tenants (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL, -- razon social
+  rut TEXT,
+  plan TEXT NOT NULL DEFAULT 'piloto' CHECK (plan IN ('piloto', 'completo', 'agencia')),
+  status TEXT NOT NULL DEFAULT 'trial' CHECK (
+    status IN ('trial', 'active', 'paused', 'cancelled')
+  ),
+  clerk_org_id TEXT UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Cada pyme tiene su propia instancia de los 6 agentes: slug ya no es unico global,
+-- es unico por tenant (dos pymes pueden tener cada una su propio 'desarrollo').
 CREATE TABLE IF NOT EXISTS agents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  slug TEXT NOT NULL UNIQUE, -- 'desarrollo' | 'marketing' | 'finanzas' | 'producto' | 'ceo'
+  tenant_id UUID NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  slug TEXT NOT NULL, -- 'desarrollo' | 'marketing' | 'finanzas' | 'producto' | 'legal' | 'ceo'
   name TEXT NOT NULL,
   role_description TEXT NOT NULL,
   -- Nivel de autonomia declarado (referencia; el enforcement real vive en approval-gate,
@@ -14,8 +32,11 @@ CREATE TABLE IF NOT EXISTS agents (
   ),
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (tenant_id, slug)
 );
+
+CREATE INDEX IF NOT EXISTS idx_agents_tenant_id ON agents (tenant_id);
 
 -- Cada corrida de un agente agrupa uno o mas registros de decisions_log bajo el mismo run_id.
 CREATE TABLE IF NOT EXISTS decisions_log (
@@ -93,7 +114,24 @@ CREATE TABLE IF NOT EXISTS reports (
 CREATE INDEX IF NOT EXISTS idx_reports_agent_id ON reports (agent_id);
 CREATE INDEX IF NOT EXISTS idx_reports_created_at ON reports (created_at);
 
--- Mantiene agents.updated_at al dia sin logica extra en el codigo de la app.
+-- Archivos/fotos que un cliente sube desde el panel para darle contexto a sus
+-- gerentes. agent_slug NULL = visible para todos los agentes de ese tenant.
+-- El contenido (caption) es dato externo: se envuelve con asUntrustedContent() en
+-- agents/_shared/uploads-tool.ts, nunca se pasa crudo al modelo.
+CREATE TABLE IF NOT EXISTS client_uploads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  agent_slug TEXT,
+  uploaded_by TEXT NOT NULL,
+  storage_path TEXT NOT NULL,
+  file_type TEXT NOT NULL CHECK (file_type IN ('image', 'document', 'other')),
+  caption TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_client_uploads_tenant_id ON client_uploads (tenant_id);
+
+-- Mantiene *.updated_at al dia sin logica extra en el codigo de la app.
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -105,5 +143,11 @@ $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS trg_agents_updated_at ON agents;
 CREATE TRIGGER trg_agents_updated_at
   BEFORE UPDATE ON agents
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_tenants_updated_at ON tenants;
+CREATE TRIGGER trg_tenants_updated_at
+  BEFORE UPDATE ON tenants
   FOR EACH ROW
   EXECUTE FUNCTION set_updated_at();

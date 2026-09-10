@@ -1,8 +1,9 @@
-// Puente HTTP minimo para que n8n (que corre en su propio contenedor Docker) pueda
-// disparar al agente de Desarrollo, que corre como proceso Node en el host. n8n solo
-// hace de "reloj" (cron) y enrutador; la logica de negocio vive en runDesarrolloAgent().
+// Puente HTTP minimo para que n8n (o el panel web) disparen al agente de Desarrollo,
+// que corre como proceso Node en el host. Acepta un tenantId opcional en el body; sin
+// el, cae al DEFAULT_TENANT_ID del .env (uso CLI/n8n de un solo tenant).
 import 'dotenv/config';
 import { createServer, type Server, type ServerResponse } from 'node:http';
+import { readJsonBody } from '../_shared/read-json-body.js';
 import { runDesarrolloAgent } from './index.js';
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
@@ -18,7 +19,11 @@ export function startDesarrolloTriggerServer(port: number): Server {
     }
 
     if (req.method === 'POST' && req.url === '/run') {
-      runDesarrolloAgent()
+      readJsonBody(req)
+        .then((body) => {
+          const tenantId = typeof body.tenantId === 'string' ? body.tenantId : undefined;
+          return runDesarrolloAgent(tenantId);
+        })
         .then((result) => {
           sendJson(res, 200, { ok: true, ...result });
         })

@@ -24,12 +24,29 @@ export interface AgentTool<TInput = Record<string, unknown>> {
 }
 
 export interface AgentConfig {
+  tenantId: string;
   slug: AgentSlug;
   constitutionPath: string;
   tools: AgentTool[];
   model?: string;
   maxTokens?: number;
   maxToolIterations?: number;
+}
+
+// Convencion para que una tool devuelva contenido multimodal (p.ej. una foto que un
+// cliente subio) en vez de texto plano. Ver agents/_shared/uploads-tool.ts para el
+// primer uso real. Cualquier tool que NO use esta forma sigue funcionando igual que
+// siempre (JSON.stringify del output).
+export interface MultimodalToolContent {
+  __multimodalContent: Array<{ type: 'text'; text: string } | { type: 'image'; url: string }>;
+}
+
+function isMultimodalToolContent(value: unknown): value is MultimodalToolContent {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Array.isArray((value as { __multimodalContent?: unknown }).__multimodalContent)
+  );
 }
 
 export interface AgentRunResult {
@@ -139,10 +156,18 @@ export class Agent {
           reasoning || `Llamada a tool ${toolUseBlock.name}`,
         );
 
+        const content = isMultimodalToolContent(output)
+          ? output.__multimodalContent.map((block) =>
+              block.type === 'image'
+                ? ({ type: 'image', source: { type: 'url', url: block.url } } as const)
+                : ({ type: 'text', text: block.text } as const),
+            )
+          : JSON.stringify(output);
+
         toolResults.push({
           type: 'tool_result',
           tool_use_id: toolUseBlock.id,
-          content: JSON.stringify(output),
+          content,
           is_error: isError,
         });
       }
@@ -162,13 +187,15 @@ export class Agent {
   }
 
   private async getAgentId(): Promise<string> {
-    const result = await this.pool.query<{ id: string }>('SELECT id FROM agents WHERE slug = $1', [
-      this.config.slug,
-    ]);
+    const result = await this.pool.query<{ id: string }>(
+      'SELECT id FROM agents WHERE tenant_id = $1 AND slug = $2',
+      [this.config.tenantId, this.config.slug],
+    );
     const row = result.rows[0];
     if (!row) {
       throw new Error(
-        `No existe un agente con slug "${this.config.slug}" en la tabla agents (corre db/seed.sql).`,
+        `No existe un agente "${this.config.slug}" para el tenant ${this.config.tenantId} ` +
+          '(corre db/seed.sql o crea el tenant/agentes desde el panel admin).',
       );
     }
     return row.id;

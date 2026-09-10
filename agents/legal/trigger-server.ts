@@ -1,7 +1,8 @@
-// Puente HTTP minimo para que n8n dispare al agente Legal (mismo patron que
-// agents/desarrollo/trigger-server.ts - ver ese archivo para el porque).
+// Puente HTTP minimo para que n8n (o el panel web) disparen al agente Legal. Acepta
+// un tenantId opcional en el body; sin el, cae al DEFAULT_TENANT_ID del .env.
 import 'dotenv/config';
 import { createServer, type Server, type ServerResponse } from 'node:http';
+import { readJsonBody } from '../_shared/read-json-body.js';
 import { runLegalAgent } from './index.js';
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
@@ -17,7 +18,11 @@ export function startLegalTriggerServer(port: number): Server {
     }
 
     if (req.method === 'POST' && req.url === '/run') {
-      runLegalAgent()
+      readJsonBody(req)
+        .then((body) => {
+          const tenantId = typeof body.tenantId === 'string' ? body.tenantId : undefined;
+          return runLegalAgent(tenantId);
+        })
         .then((result) => {
           sendJson(res, 200, { ok: true, ...result });
         })
