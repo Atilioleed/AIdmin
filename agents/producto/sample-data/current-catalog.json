@@ -1,0 +1,6 @@
+[
+  { "id": "DOC-CONTR-ARR-01", "name": "Contrato de arriendo simple", "priceClp": 4990 },
+  { "id": "DOC-FINQ-01", "name": "Finiquito laboral", "priceClp": 5990 },
+  { "id": "DOC-PODER-01", "name": "Poder simple", "priceClp": 2990 },
+  { "id": "DOC-COMPRAVENTA-01", "name": "Contrato de compraventa de vehiculo", "priceClp": 5990 }
+]

@@ -1,0 +1,18 @@
+[
+  {
+    "topic": "Proteccion de datos personales",
+    "guidance": "Verificar clausula de consentimiento y finalidad del tratamiento de datos en todo documento que recolecte datos personales del usuario."
+  },
+  {
+    "topic": "Proteccion al consumidor",
+    "guidance": "Asegurar lenguaje claro y no abusivo en documentos dirigidos a personas naturales; evitar clausulas unilaterales sin contrapeso."
+  },
+  {
+    "topic": "Disclaimer de servicio",
+    "guidance": "Todo documento generado debe incluir aviso de que la plataforma no reemplaza asesoria legal profesional."
+  },
+  {
+    "topic": "Vigencia normativa",
+    "guidance": "Confirmar que la plantilla no cite articulos derogados o modificados desde su ultima revision."
+  }
+]

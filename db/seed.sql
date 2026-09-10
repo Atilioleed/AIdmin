@@ -1,7 +1,8 @@
 -- AIdmin - seed inicial
--- Los 5 agentes de la arquitectura objetivo quedan registrados desde ya para que el
--- esquema los soporte sin retrabajo. Se activan de a uno por sprint: 'desarrollo' y
--- 'finanzas' ya estan construidos; marketing/producto/ceo siguen pendientes.
+-- Los agentes quedan registrados desde ya para que el esquema los soporte sin
+-- retrabajo. Se activan de a uno por sprint. 'producto' se redefinio: ya no es solo
+-- catalogo/precios, ahora tambien investiga mercado/competencia (con acceso web real
+-- via Tavily) para proponer mejoras; marketing queda 100% en publicidad/redes.
 
 INSERT INTO agents (slug, name, role_description, autonomy_level, is_active)
 VALUES
@@ -15,9 +16,9 @@ VALUES
   (
     'ceo',
     'Gerente General (CEO)',
-    'Lee los reportes semanales de los otros agentes y las metricas de negocio; fija prioridades y sugiere reinversion.',
+    'Lee los reportes recientes de los otros agentes y las aprobaciones pendientes; arma la pauta de comite diaria (acuerdos, tensiones, prioridades).',
     'recommend_only',
-    FALSE
+    TRUE
   ),
   (
     'marketing',
@@ -36,8 +37,15 @@ VALUES
   (
     'producto',
     'Gerente de Producto',
-    'Catalogo, costos y precios.',
+    'Catalogo, costos y precios; investiga mercado y competencia (acceso web real) para proponer mejoras.',
     'propose_only',
-    FALSE
+    TRUE
+  ),
+  (
+    'legal',
+    'Gerente Legal',
+    'Revisa el catalogo de documentos legales por cumplimiento; coordina con Producto en propuestas nuevas.',
+    'propose_only',
+    TRUE
   )
 ON CONFLICT (slug) DO NOTHING;

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "DOC-CONTR-ARR-01",
+    "name": "Contrato de arriendo simple",
+    "category": "Arriendo",
+    "lastReviewedAt": "2026-06-01",
+    "status": "ok"
+  },
+  {
+    "id": "DOC-FINQ-01",
+    "name": "Finiquito laboral",
+    "category": "Laboral",
+    "lastReviewedAt": "2025-11-15",
+    "status": "needs_review",
+    "notes": "Revisar contra la ultima modificacion del Codigo del Trabajo sobre indemnizaciones por anos de servicio."
+  },
+  {
+    "id": "DOC-PODER-01",
+    "name": "Poder simple",
+    "category": "General",
+    "lastReviewedAt": "2026-08-20",
+    "status": "ok"
+  },
+  {
+    "id": "DOC-COMPRAVENTA-01",
+    "name": "Contrato de compraventa de vehiculo",
+    "category": "Compraventa",
+    "lastReviewedAt": "2026-01-10",
+    "status": "needs_review",
+    "notes": "Falta clausula de responsabilidad post-venta; el disclaimer de 'esto no constituye asesoria legal' esta desactualizado en el pie de pagina."
+  }
+]

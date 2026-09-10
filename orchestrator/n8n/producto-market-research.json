@@ -1,0 +1,64 @@
+{
+  "name": "AIdmin - Producto - Investigacion de mercado",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "cronExpression", "expression": "30 9 * * *" }] }
+      },
+      "id": "schedule-trigger",
+      "name": "Disparo diario 09:30",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 180]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Disparo manual (test)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 420]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:4103/run",
+        "options": { "timeout": 180000 }
+      },
+      "id": "trigger-agent",
+      "name": "Ejecutar agente Producto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, run_id, summary, created_at\nFROM reports\nWHERE run_id = '{{ $json.runId }}'\nORDER BY created_at DESC\nLIMIT 1;"
+      },
+      "id": "confirm-report",
+      "name": "Confirmar reporte en DB",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [720, 300],
+      "credentials": {
+        "postgres": { "id": "aidmin-postgres-credential", "name": "AIdmin Postgres (local)" }
+      }
+    }
+  ],
+  "connections": {
+    "Disparo diario 09:30": {
+      "main": [[{ "node": "Ejecutar agente Producto", "type": "main", "index": 0 }]]
+    },
+    "Disparo manual (test)": {
+      "main": [[{ "node": "Ejecutar agente Producto", "type": "main", "index": 0 }]]
+    },
+    "Ejecutar agente Producto": {
+      "main": [[{ "node": "Confirmar reporte en DB", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "id": "aidmin-producto-market-research",
+  "meta": { "instanceId": "aidmin-local" }
+}
