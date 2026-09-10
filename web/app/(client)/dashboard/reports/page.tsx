@@ -13,7 +13,7 @@ export default async function ReportsPage() {
       <h1 className="text-lg font-semibold text-neutral-900">Historial de reportes</h1>
       {reports.length === 0 ? (
         <p className="rounded-lg border border-dashed border-neutral-300 bg-white p-6 text-sm text-neutral-500">
-          Todavía no hay reportes. Corre un agente para ver su primer reporte acá.
+          Todavía no hay reportes. Corre un agente para ver su primer reporte aquí.
         </p>
       ) : (
         <div className="flex flex-col gap-3">

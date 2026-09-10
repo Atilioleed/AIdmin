@@ -16,7 +16,7 @@ export default async function NegocioPage() {
         <p className="text-sm text-neutral-500">
           Esto lo lee tu comité completo (los 6 gerentes) antes de trabajar — son las
           mismas preguntas que haría un fondo antes de invertir. Mientras más completo
-          esté, mejor trabajan por vos.
+          esté, mejor trabajan por ti.
         </p>
       </div>
 

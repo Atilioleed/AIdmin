@@ -13,7 +13,7 @@ export default async function AgentesPage() {
         <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-soft)]">
           Personalidad, tono, habilidades y objetivo de cada gerente — aplica a todas las
           pymes. Los límites de autonomía (aprobación humana de plata y contenido
-          público) están fijos en el código, no se editan acá.
+          público) están fijos en el código, no se editan aquí.
         </p>
       </div>
 

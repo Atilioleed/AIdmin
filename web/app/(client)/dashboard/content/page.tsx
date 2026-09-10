@@ -15,7 +15,7 @@ export default async function ContentPage() {
         <h1 className="text-lg font-semibold text-neutral-900">Contenido pendiente de revisión</h1>
         <p className="text-sm text-neutral-500">
           Posts orgánicos que Marketing dejó listos. Ninguno se publica hasta que lo
-          apruebes acá (Metricool real aún no está conectado, así que por ahora esto
+          apruebes aquí (Metricool real aún no está conectado, así que por ahora esto
           deja constancia de la aprobación).
         </p>
       </div>

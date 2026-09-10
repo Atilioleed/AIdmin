@@ -26,7 +26,7 @@ export default async function AgentProfilePage({ params }: { params: Promise<{ s
         <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-soft)]">
           Esto define cómo se presenta y qué habilidades declara al ejecutarse — aplica a
           todas las pymes. Los límites de autonomía (qué puede y no puede hacer) están
-          fijos en el código, no acá.
+          fijos en el código, no aquí.
         </p>
       </div>
 

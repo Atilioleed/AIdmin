@@ -9,12 +9,12 @@ const STEPS = [
   {
     n: '02',
     title: 'Lo sensible espera tu firma',
-    body: 'Todo lo que implica dinero real o una publicación pública se detiene en un canal humano. Nada sale sin que vos lo apruebes.',
+    body: 'Todo lo que implica dinero real o una publicación pública se detiene en un canal humano. Nada sale sin que tú lo apruebes.',
   },
   {
     n: '03',
-    title: 'Decidís con un clic',
-    body: 'Aprobás o rechazás desde tu panel. Cada decisión — tuya y de tus gerentes — queda registrada en una bitácora trazable.',
+    title: 'Decides con un clic',
+    body: 'Apruebas o rechazas desde tu panel. Cada decisión — tuya y de tus gerentes — queda registrada en una bitácora trazable.',
   },
 ];
 
@@ -31,11 +31,11 @@ export function HowItWorks() {
           <div className="max-w-xl">
             <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-gold)]">Cómo funciona</p>
             <h2 className="mt-2 font-display text-3xl font-semibold text-white sm:text-4xl">
-              Autonomía real, <span className="text-gradient-warm">con vos al mando</span>
+              Autonomía real, <span className="text-gradient-warm">contigo al mando</span>
             </h2>
             <p className="mt-3 text-white/65">
               AIdmin no te reemplaza — te devuelve tiempo. Los gerentes hacen el trabajo
-              pesado; vos seguís tomando cada decisión que importa.
+              pesado; tú sigues tomando cada decisión que importa.
             </p>
           </div>
         </Reveal>

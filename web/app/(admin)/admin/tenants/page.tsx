@@ -19,8 +19,8 @@ export default async function TenantsPage() {
           Pymes <span className="text-gradient-warm">afiliadas</span>
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-soft)]">
-          Crear una pyme acá le da su propio set de 6 agentes de inmediato. Falta
-          crear su Organization en Clerk aparte (dashboard de Clerk) y pegar el ID acá.
+          Crear una pyme aquí le da su propio set de 6 agentes de inmediato. Falta
+          crear su Organization en Clerk aparte (dashboard de Clerk) y pegar el ID aquí.
         </p>
       </div>
 

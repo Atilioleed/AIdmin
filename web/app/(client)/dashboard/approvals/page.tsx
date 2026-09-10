@@ -15,7 +15,7 @@ export default async function ApprovalsPage() {
         <h1 className="text-lg font-semibold text-neutral-900">Aprobaciones pendientes</h1>
         <p className="text-sm text-neutral-500">
           Dinero y campañas pagas de cualquier agente. Ninguno puede ejecutar esto por
-          su cuenta - siempre queda esperando tu decisión acá.
+          su cuenta - siempre queda esperando tu decisión aquí.
         </p>
       </div>
       {approvals.length === 0 ? (

@@ -66,7 +66,7 @@ export default async function IntegrationsPage() {
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-soft)]">
           Cada agente y gate corre como su propio proceso (trigger-server); si no está
-          levantado localmente, aparece como &ldquo;Caído&rdquo; acá aunque esté todo
+          levantado localmente, aparece como &ldquo;Caído&rdquo; aquí aunque esté todo
           bien en el código.
         </p>
       </div>

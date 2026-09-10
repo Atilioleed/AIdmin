@@ -21,7 +21,7 @@ export function Hero() {
           <p className="mt-5 max-w-md text-base leading-relaxed text-white/70">
             AIdmin pone seis gerentes de inteligencia artificial a cargo de tu pyme —
             marketing, finanzas, producto, legal, desarrollo y un CEO que preside el
-            comité — trabajando en conjunto, todos los días, con vos siempre a cargo
+            comité — trabajando en conjunto, todos los días, contigo siempre a cargo
             de la última palabra.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
