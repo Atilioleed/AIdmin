@@ -18,9 +18,15 @@ posteriores.
 
 2. **Orquestador** — el "reloj" que despierta a cada agente en su horario o por
    evento y enruta reportes entre ellos.
-   **Construido**: n8n self-hosted vía `docker-compose.yml`, con un workflow por
-   agente en `orchestrator/n8n/` (cron + disparo manual de prueba). La lógica de
-   negocio fina vive en TypeScript, no en n8n.
+   **Construido y activo**: n8n self-hosted vía `docker-compose.yml`, con un workflow
+   por agente en `orchestrator/n8n/` (cron + disparo manual de prueba), cada uno con
+   una nota visible en el canvas explicando de dónde saca su especialización
+   (`agent_profiles`, `agent_knowledge`, `business_context`, su `constitution.md`).
+   La lógica de negocio fina vive en TypeScript, no en n8n — cada workflow solo
+   agenda y confirma; la corrida real pasa por el trigger-server Node de ese agente
+   (puertos 4100-4105 en el host, ver `.env`). Requiere Docker arriba y los 6
+   trigger-servers corriendo en la máquina local (`npm run dev:<agente>:server`)
+   mientras no se despliegue a un servidor permanente.
 
 3. **Memoria y datos** — historial de decisiones, reportes, métricas, catálogo.
    **Construido**: PostgreSQL local vía Docker (`db/schema.sql`, `db/seed.sql`),

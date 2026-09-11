@@ -3,6 +3,19 @@
   "nodes": [
     {
       "parameters": {
+        "content": "## 🧠 Especialización de este agente (Francisca - Legal)\n\n**Reglas fijas (código):** `agents/legal/constitution.md` — rol, límites de autonomía, formato del reporte.\n\n**Personalidad editable:** tabla `agent_profiles` → admin en `/admin/agentes/legal`.\n\n**Base de conocimiento:** tabla `agent_knowledge` — documentos/links que el admin le carga a este rol.\n\n**Contexto del negocio:** tabla `business_context` — lo que el cliente carga en `/dashboard/negocio` (compartido por los 6 gerentes).\n\n**Este workflow solo agenda y confirma.** La inteligencia real corre en el proceso Node del trigger-server (puerto 4102, `npm run dev:legal:server`), que arma el prompt con todo lo anterior y llama al LLM.",
+        "height": 380,
+        "width": 420,
+        "color": 4
+      },
+      "id": "info-sticky",
+      "name": "Dónde vive el conocimiento de este agente",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, -420]
+    },
+    {
+      "parameters": {
         "rule": { "interval": [{ "field": "cronExpression", "expression": "0 9 * * *" }] }
       },
       "id": "schedule-trigger",
@@ -57,7 +70,7 @@
       "main": [[{ "node": "Confirmar reporte en DB", "type": "main", "index": 0 }]]
     }
   },
-  "active": false,
+  "active": true,
   "settings": { "executionOrder": "v1" },
   "id": "aidmin-legal-catalog-review",
   "meta": { "instanceId": "aidmin-local" }

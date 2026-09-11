@@ -3,6 +3,19 @@
   "nodes": [
     {
       "parameters": {
+        "content": "## 🧠 Especialización de este agente (Camila - Producto)\n\n**Reglas fijas (código):** `agents/producto/constitution.md` — rol, límites de autonomía, formato del reporte.\n\n**Personalidad editable:** tabla `agent_profiles` → admin en `/admin/agentes/producto`.\n\n**Base de conocimiento:** tabla `agent_knowledge` — documentos/links que el admin le carga a este rol.\n\n**Contexto del negocio:** tabla `business_context` — lo que el cliente carga en `/dashboard/negocio` (compartido por los 6 gerentes).\n\n**Único agente con acceso web real (Tavily)** — investiga mercado/competencia en vivo, además de todo lo anterior.\n\n**Este workflow solo agenda y confirma.** La inteligencia real corre en el proceso Node del trigger-server (puerto 4103, `npm run dev:producto:server`).",
+        "height": 400,
+        "width": 420,
+        "color": 4
+      },
+      "id": "info-sticky",
+      "name": "Dónde vive el conocimiento de este agente",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, -440]
+    },
+    {
+      "parameters": {
         "rule": { "interval": [{ "field": "cronExpression", "expression": "30 9 * * *" }] }
       },
       "id": "schedule-trigger",
@@ -57,7 +70,7 @@
       "main": [[{ "node": "Confirmar reporte en DB", "type": "main", "index": 0 }]]
     }
   },
-  "active": false,
+  "active": true,
   "settings": { "executionOrder": "v1" },
   "id": "aidmin-producto-market-research",
   "meta": { "instanceId": "aidmin-local" }

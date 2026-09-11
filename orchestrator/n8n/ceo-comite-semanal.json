@@ -3,6 +3,19 @@
   "nodes": [
     {
       "parameters": {
+        "content": "## 🧠 Especialización de este agente (Rodrigo - CEO / Comité)\n\n**Reglas fijas (código):** `agents/ceo/constitution.md` — solo lee y recomienda, nunca autoriza gasto ni reemplaza aprobación humana.\n\n**Personalidad editable:** tabla `agent_profiles` → admin en `/admin/agentes/ceo`.\n\n**Base de conocimiento:** tabla `agent_knowledge` propia + los `reports` recientes de los otros 5 gerentes + `approvals`/`content_reviews` pendientes (es el único agente que lee el trabajo de los demás).\n\n**Contexto del negocio:** tabla `business_context` — lo que el cliente carga en `/dashboard/negocio`.\n\n**Corre lunes y jueves 10:00**, después de que los otros 5 ya generaron sus reportes del día. Este workflow solo agenda y confirma; la inteligencia real corre en el trigger-server (puerto 4104, `npm run dev:ceo:server` — ver `agents/ceo/index.ts`).",
+        "height": 400,
+        "width": 440,
+        "color": 4
+      },
+      "id": "info-sticky",
+      "name": "Dónde vive el conocimiento de este agente",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, -440]
+    },
+    {
+      "parameters": {
         "rule": { "interval": [{ "field": "cronExpression", "expression": "0 10 * * 1,4" }] }
       },
       "id": "schedule-trigger",
@@ -57,7 +70,7 @@
       "main": [[{ "node": "Confirmar pauta en DB", "type": "main", "index": 0 }]]
     }
   },
-  "active": false,
+  "active": true,
   "settings": { "executionOrder": "v1" },
   "id": "aidmin-ceo-comite-semanal",
   "meta": { "instanceId": "aidmin-local" }

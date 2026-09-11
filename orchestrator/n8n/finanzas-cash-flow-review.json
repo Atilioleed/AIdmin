@@ -3,6 +3,19 @@
   "nodes": [
     {
       "parameters": {
+        "content": "## 🧠 Especialización de este agente (Valentina - Finanzas)\n\n**Reglas fijas (código):** `agents/finanzas/constitution.md` — rol, límites de autonomía, formato del reporte.\n\n**Personalidad editable:** tabla `agent_profiles` → admin en `/admin/agentes/finanzas`.\n\n**Base de conocimiento:** tabla `agent_knowledge` — documentos/links que el admin le carga a este rol.\n\n**Contexto del negocio:** tabla `business_context` — lo que el cliente carga en `/dashboard/negocio` (compartido por los 6 gerentes).\n\n**Este workflow solo agenda y confirma.** La inteligencia real corre en el proceso Node del trigger-server (puerto 4101, `npm run dev:finanzas:server`), que arma el prompt con todo lo anterior y llama al LLM.",
+        "height": 380,
+        "width": 420,
+        "color": 4
+      },
+      "id": "info-sticky",
+      "name": "Dónde vive el conocimiento de este agente",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, -420]
+    },
+    {
+      "parameters": {
         "rule": {
           "interval": [
             {
@@ -91,7 +104,7 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
