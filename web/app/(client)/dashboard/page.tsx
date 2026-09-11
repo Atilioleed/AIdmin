@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentTenant } from '../../../lib/tenant';
 import { getLatestReport, listAgentActivity } from '../../../lib/queries';
 import { OnboardingChecklist } from './OnboardingChecklist';
+import { AcceptTermsCard } from './AcceptTermsCard';
 import { AgentNetworkVisual } from '../../../components/AgentNetworkVisual';
 import { AgentAvatar } from '../../../components/AgentAvatar';
 import { Logo } from '../../../components/Logo';
@@ -21,6 +22,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      {!tenant.termsAcceptedAt && <AcceptTermsCard />}
+
       <AgentNetworkVisual
         title="Tu comité, trabajando ahora"
         subtitle="Los 6 gerentes de IA de tu pyme siguen conectados, se pasan información entre sí y nunca se detienen — esto es actividad real, no decoración."
@@ -53,7 +56,7 @@ export default async function DashboardPage() {
         <span className="shrink-0 text-white/70 transition-transform group-hover:translate-x-1">→</span>
       </Link>
 
-      <OnboardingChecklist tenantId={tenant.id} />
+      <OnboardingChecklist tenantId={tenant.id} termsAcceptedAt={tenant.termsAcceptedAt} />
 
       <div>
         <div className="mb-3 flex items-center justify-between">

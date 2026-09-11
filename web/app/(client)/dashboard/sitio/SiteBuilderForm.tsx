@@ -99,6 +99,17 @@ export function SiteBuilderForm({
           <input type="checkbox" name="published" defaultChecked={website?.published} />
           Publicar (visible en /sitio/{tenantSlug ?? '...'})
         </label>
+
+        <div className="border-t border-[var(--color-border-soft)] pt-4">
+          <label className={labelClass}>
+            Dominio propio <span className="font-normal text-[var(--color-ink-faint)]">(próximamente)</span>
+          </label>
+          <input name="customDomain" defaultValue={website?.customDomain} placeholder="www.tu-negocio.cl" className={inputClass} />
+          <p className="mt-1 text-xs text-[var(--color-ink-faint)]">
+            Todavía no conectamos dominios propios automáticamente — dejamos el tuyo guardado
+            para activarlo apenas esté listo. Un dominio a medida tiene un costo aparte.
+          </p>
+        </div>
       </div>
 
       {error && <p className="text-xs font-medium text-[var(--color-critical)]">{error}</p>}

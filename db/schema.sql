@@ -378,3 +378,50 @@ CREATE INDEX IF NOT EXISTS idx_chat_messages_tenant_id ON chat_messages (tenant_
 -- el HTML de la pagina.
 ALTER TABLE social_links ADD COLUMN IF NOT EXISTS metricool_api_key TEXT;
 ALTER TABLE social_links ADD COLUMN IF NOT EXISTS metricool_connected_at TIMESTAMPTZ;
+
+-- Aceptacion de terminos y condiciones (/terminos) al completar el onboarding.
+-- Una vez por tenant, no por usuario - lo acepta quien primero completa el negocio.
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ;
+ALTER TABLE tenants ADD COLUMN IF NOT EXISTS terms_accepted_by TEXT;
+
+-- Pedidos de clientes finales (los clientes DE la pyme, no la pyme misma). Todavia
+-- no hay checkout/pago online conectado (ver roadmap en docs/architecture.md - fase
+-- de Mercado Pago Marketplace), asi que por ahora el pedido lo carga la pyme misma
+-- (llega por WhatsApp, telefono, redes - muy comun en pymes chilenas) en vez de
+-- nacer solo de un carrito. order_number es correlativo POR TENANT (no global),
+-- friendly para mostrarselo al cliente final ("tu pedido #1032").
+CREATE TABLE IF NOT EXISTS orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  order_number INTEGER NOT NULL,
+  customer_name TEXT NOT NULL,
+  customer_email TEXT,
+  customer_phone TEXT,
+  shipping_address TEXT,
+  -- snapshot de items al momento del pedido (nombre/precio pueden cambiar despues
+  -- en products) - [{ productId, name, quantity, unitPriceClp }]
+  items JSONB NOT NULL DEFAULT '[]'::JSONB,
+  total_clp INTEGER NOT NULL DEFAULT 0 CHECK (total_clp >= 0),
+  status TEXT NOT NULL DEFAULT 'recibido' CHECK (
+    status IN ('recibido', 'preparando', 'despachado', 'entregado', 'cancelado')
+  ),
+  tracking_info TEXT, -- courier + numero de seguimiento, texto libre
+  notes TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by TEXT,
+  UNIQUE (tenant_id, order_number)
+);
+
+CREATE INDEX IF NOT EXISTS idx_orders_tenant_id ON orders (tenant_id, created_at DESC);
+
+DROP TRIGGER IF EXISTS trg_orders_updated_at ON orders;
+CREATE TRIGGER trg_orders_updated_at
+  BEFORE UPDATE ON orders
+  FOR EACH ROW
+  EXECUTE FUNCTION set_updated_at();
+
+-- Dominio propio que la pyme quiere usar (ej. www.mipyme.cl) - preparado para
+-- cuando se conecte DNS/dominio real (roadmap), no se provisiona automaticamente
+-- todavia. Se guarda desde ya para no volver a pedirlo despues.
+ALTER TABLE tenant_websites ADD COLUMN IF NOT EXISTS custom_domain TEXT;

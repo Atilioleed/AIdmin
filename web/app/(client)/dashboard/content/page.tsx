@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentTenant } from '../../../../lib/tenant';
 import { listPendingContentReviews } from '../../../../lib/queries';
 import { ContentCard } from './ContentCard';
+import { GenerateContentForm } from './GenerateContentForm';
 
 export default async function ContentPage() {
   const tenant = await getCurrentTenant();
@@ -20,6 +21,8 @@ export default async function ContentPage() {
           apruebes aquí.
         </p>
       </div>
+
+      <GenerateContentForm />
 
       {reviews.length === 0 ? (
         <div className="card p-8 text-center">

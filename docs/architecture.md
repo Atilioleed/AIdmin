@@ -196,21 +196,44 @@ de Docker, para que migrar a Supabase sea solo cambiar `DATABASE_URL`.
   cuando algo cae bajo su umbral de seguridad. De paso se cerró un gap real: la
   tabla `client_uploads` existía sin que ningún agente la leyera —
   `get_client_uploads` (agents/_shared/uploads-tool.ts) ya está conectada a los 6.
-- **Pago real de terceros (dinero de LOS CLIENTES de cada pyme) + envíos + dashboard
-  financiero real — Fase 2, todavía no construida.** Investigado: **Mercado Pago
-  Marketplace/Application API** es la opción confirmada con OAuth por vendedor +
-  `marketplace_fee` automático para Chile (Transbank Webpay Mall existe pero es
-  onboarding comercial pesado, no self-serve; Flow/Khipu sin marketplace confirmado).
-  Para envíos, agregadores como Enviame.io/Shipit.cl (multi-courier, una sola
-  integración) además de APIs directas de Chilexpress/Correos de Chile/Bluexpress.
-  Motivo de dejarlo aparte: procesar dinero de terceros exige tokens OAuth cifrados
-  en reposo, verificación de webhooks, y que el usuario cree su propia app de
-  desarrollador en Mercado Pago primero — más una sesión dedicada que una extensión
-  de lo demás. **Nota para el pitch**: el `marketplace_fee` de Mercado Pago le daría
-  a AIdmin una segunda fuente de ingresos (comisión % sobre el GMV que procesan sus
-  pymes) además del fee mensual fijo — no solo un SaaS de asiento fijo, sino uno con
-  techo de ingresos ligado al éxito de ventas de sus clientes. No comprometido
-  todavía, solo documentado.
+- **Pago real de terceros (dinero de LOS CLIENTES de cada pyme, cobro con tarjeta a
+  la propia pyme, y envíos reales) — Fase 2, todavía no construida, pero ya con
+  proveedor elegido.** Decisión confirmada: **Mercado Pago Marketplace/Application
+  API** — OAuth por vendedor + `marketplace_fee` automático para Chile (Transbank
+  Webpay Mall existe pero es onboarding comercial pesado, no self-serve; Flow/Khipu
+  sin marketplace confirmado). Falta: que el usuario cree su cuenta de desarrollador
+  en Mercado Pago y pase `client_id`/`client_secret` (no es algo que se pueda crear
+  en su nombre), luego construir el flujo OAuth por pyme (`/dashboard/pagos`), un
+  webhook receptor con tokens cifrados en reposo, y la tarjeta/cobro recurrente de
+  la propia suscripción de AIdmin (hoy `/admin/tenants` gestiona plan/estado a
+  mano). Para envíos, agregadores como Enviame.io/Shipit.cl (multi-courier, una
+  sola integración) además de APIs directas de Chilexpress/Correos de
+  Chile/Bluexpress. **Nota para el pitch**: el `marketplace_fee` de Mercado Pago le
+  daría a AIdmin una segunda fuente de ingresos (comisión % sobre el GMV que
+  procesan sus pymes) además del fee mensual fijo — no solo un SaaS de asiento fijo,
+  sino uno con techo de ingresos ligado al éxito de ventas de sus clientes.
+- ~~Pedidos de clientes finales (número, estado, despacho, correo automático)~~ —
+  **construida, sin depender del pago online.** Como todavía no hay checkout real
+  (ver punto anterior), `/dashboard/pedidos` deja que la pyme cargue el pedido ella
+  misma (llega por WhatsApp/teléfono/redes, como hacen hoy la mayoría de las pymes
+  chilenas) — número correlativo por pyme, estado (recibido → preparando →
+  despachado → entregado/cancelado), tracking, y un correo automático al cliente
+  FINAL (no al dueño de la pyme) en cada cambio de estado, vía Resend (tabla
+  `orders`, `web/lib/orders.ts`). Cuando se conecte Mercado Pago, el checkout puede
+  crear estas mismas filas en vez de que la pyme las tipee a mano.
+- ~~Contrato aceptado al contratar~~ — **construida.** `tenants.terms_accepted_at`/
+  `terms_accepted_by`, con una tarjeta bloqueante en `/dashboard` (`AcceptTermsCard`)
+  hasta que el cliente marque que leyó `/terminos` y acepte.
+- ~~Generar contenido con Marketing bajo demanda~~ — **construida.** En
+  `/dashboard/content`, un formulario le pide a Marketing (como community manager)
+  un post para una red + un brief, y lo genera en el momento con el mismo LLM
+  liviano del chat del CEO (`web/lib/marketing-generate.ts`), dejándolo directo en
+  `content_reviews` para aprobar/programar — no hace falta esperar a que Marketing
+  corra solo. Reels/video con IA sigue sin proveedor elegido (ver item aparte).
+- **Dominio propio / DNS** — el campo ya existe (`tenant_websites.custom_domain`,
+  `/dashboard/sitio`) para no tener que volver a pedirlo, pero no hay provisión
+  automática de DNS/SSL todavía (requeriría la API de dominios de Vercel + que el
+  cliente sea dueño de un dominio real) — hoy el sitio solo vive en `/sitio/<slug>`.
 - **Un futuro Gerente de Operaciones dedicado** — por ahora las alertas de stock
   viven en el Gerente de Producto (ya cubre "catálogo, costos y precios"); tiene
   sentido separarlo en su propio agente cuando el volumen de ventas real (Fase 2)

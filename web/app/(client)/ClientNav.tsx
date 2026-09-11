@@ -74,6 +74,17 @@ const ICONS: Record<string, React.ReactNode> = {
       strokeLinejoin="round"
     />
   ),
+  receipt: (
+    <>
+      <path
+        d="M6 3.5h12v17l-2.5-1.6L13 20.5l-1.5-1.6-1.5 1.6-2.5-1.6L6 20.5V3.5Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="M9 8h6M9 11.5h6M9 15h3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </>
+  ),
 };
 
 export function ClientNav({ items }: { items: { href: string; label: string; icon: keyof typeof ICONS }[] }) {

@@ -1,7 +1,7 @@
 import { getAgentProfile } from './agent-profiles';
 import { getBusinessContext } from './business-context';
 import { listReports, listPendingApprovals, listPendingContentReviews } from './queries';
-import { checkCeoChatCapOk, recordCeoChatUsage } from './agent-usage';
+import { checkAgentCapOk, recordAgentUsage } from './agent-usage';
 import { chatCompletion, type ChatMessage } from './llm';
 
 export interface AskCeoResult {
@@ -65,7 +65,7 @@ el contexto de arriba, dilo en vez de inventarlo.`;
 }
 
 export async function askCeo(tenantId: string, history: ChatMessage[]): Promise<AskCeoResult> {
-  const cap = await checkCeoChatCapOk(tenantId);
+  const cap = await checkAgentCapOk(tenantId, 'ceo');
   if (!cap.ok) {
     return {
       capped: true,
@@ -78,7 +78,7 @@ export async function askCeo(tenantId: string, history: ChatMessage[]): Promise<
 
   const system = await buildSystemPrompt(tenantId);
   const result = await chatCompletion(system, history);
-  await recordCeoChatUsage(tenantId, result.inputTokens, result.outputTokens);
+  await recordAgentUsage(tenantId, 'ceo', result.inputTokens, result.outputTokens);
 
   return { reply: result.text || '(sin respuesta)', capped: false };
 }

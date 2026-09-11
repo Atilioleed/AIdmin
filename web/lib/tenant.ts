@@ -10,6 +10,8 @@ export interface TenantRecord {
   status: 'trial' | 'active' | 'paused' | 'cancelled';
   clerkOrgId: string | null;
   createdAt: Date;
+  termsAcceptedAt: Date | null;
+  termsAcceptedBy: string | null;
 }
 
 function toTenant(row: {
@@ -21,6 +23,8 @@ function toTenant(row: {
   status: TenantRecord['status'];
   clerk_org_id: string | null;
   created_at: Date;
+  terms_accepted_at: Date | null;
+  terms_accepted_by: string | null;
 }): TenantRecord {
   return {
     id: row.id,
@@ -31,10 +35,13 @@ function toTenant(row: {
     status: row.status,
     clerkOrgId: row.clerk_org_id,
     createdAt: row.created_at,
+    termsAcceptedAt: row.terms_accepted_at,
+    termsAcceptedBy: row.terms_accepted_by,
   };
 }
 
-const SELECT_COLUMNS = 'id, name, slug, rut, plan, status, clerk_org_id, created_at';
+const SELECT_COLUMNS =
+  'id, name, slug, rut, plan, status, clerk_org_id, created_at, terms_accepted_at, terms_accepted_by';
 
 /**
  * Resuelve el tenant de la sesion actual a partir de la Organization activa de
@@ -53,6 +60,13 @@ export async function getTenantById(tenantId: string): Promise<TenantRecord | nu
   const result = await getPool().query(`SELECT ${SELECT_COLUMNS} FROM tenants WHERE id = $1`, [tenantId]);
   const row = result.rows[0] as Parameters<typeof toTenant>[0] | undefined;
   return row ? toTenant(row) : null;
+}
+
+export async function acceptTerms(tenantId: string, acceptedBy: string): Promise<void> {
+  await getPool().query('UPDATE tenants SET terms_accepted_at = now(), terms_accepted_by = $2 WHERE id = $1', [
+    tenantId,
+    acceptedBy,
+  ]);
 }
 
 export async function listTenants(): Promise<TenantRecord[]> {

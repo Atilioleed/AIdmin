@@ -20,6 +20,7 @@ export async function saveTenantWebsiteAction(formData: FormData): Promise<{ err
   const colorSecondary = String(formData.get('colorSecondary') ?? '#ff8a5b');
   const colorBackground = String(formData.get('colorBackground') ?? '#ffffff');
   const published = formData.get('published') === 'on';
+  const customDomain = String(formData.get('customDomain') ?? '').trim();
 
   let logoStoragePath: string | null = (await getTenantWebsite(tenant.id))?.logoStoragePath ?? null;
   const logoFile = formData.get('logo');
@@ -42,6 +43,7 @@ export async function saveTenantWebsiteAction(formData: FormData): Promise<{ err
     colorSecondary,
     colorBackground,
     published,
+    customDomain,
     updatedBy,
   });
 

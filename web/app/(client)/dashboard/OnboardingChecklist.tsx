@@ -4,7 +4,7 @@ import { getTenantWebsite } from '../../../lib/tenant-websites';
 import { getSocialLinks } from '../../../lib/social-links';
 import { listProducts } from '../../../lib/products';
 
-export async function OnboardingChecklist({ tenantId }: { tenantId: string }) {
+export async function OnboardingChecklist({ tenantId, termsAcceptedAt }: { tenantId: string; termsAcceptedAt: Date | null }) {
   const [businessContext, website, socialLinks, products] = await Promise.all([
     getBusinessContext(tenantId),
     getTenantWebsite(tenantId),
@@ -15,6 +15,7 @@ export async function OnboardingChecklist({ tenantId }: { tenantId: string }) {
   const needsInventory = businessContext.businessType === 'producto' || businessContext.businessType === 'mixto';
 
   const steps = [
+    { label: 'Aceptar contrato', href: '/dashboard', done: Boolean(termsAcceptedAt) },
     {
       label: 'Contexto de negocio',
       href: '/dashboard/negocio',

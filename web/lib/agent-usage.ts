@@ -32,31 +32,39 @@ export async function updateTenantDailyCap(tenantId: string, capTokens: number):
 }
 
 /**
- * Mismo chequeo que agents/_shared/usage.ts (checkDailyCapOk), pero para el chat en
- * vivo del panel cliente, que corre en web/ - paquete separado, misma tabla. El chat
- * con el CEO cuenta contra el tope diario del propio agente 'ceo'.
+ * Mismo chequeo que agents/_shared/usage.ts (checkDailyCapOk), pero para llamadas al
+ * LLM que corren desde web/ (chat en vivo con el CEO, generacion de contenido bajo
+ * demanda de Marketing) - paquete separado, misma tabla y mismo tope por agente.
  */
-export async function checkCeoChatCapOk(tenantId: string): Promise<{ ok: boolean; capTokens: number; usedTokens: number }> {
+export async function checkAgentCapOk(
+  tenantId: string,
+  agentSlug: AgentProfileSlug,
+): Promise<{ ok: boolean; capTokens: number; usedTokens: number }> {
   const capTokens = await getTenantDailyCap(tenantId);
   const result = await getPool().query<{ input_tokens: string; output_tokens: string }>(
     `SELECT input_tokens, output_tokens FROM agent_usage_daily
-     WHERE tenant_id = $1 AND agent_slug = 'ceo' AND usage_date = CURRENT_DATE`,
-    [tenantId],
+     WHERE tenant_id = $1 AND agent_slug = $2 AND usage_date = CURRENT_DATE`,
+    [tenantId, agentSlug],
   );
   const row = result.rows[0];
   const usedTokens = row ? Number(row.input_tokens) + Number(row.output_tokens) : 0;
   return { ok: usedTokens < capTokens, capTokens, usedTokens };
 }
 
-export async function recordCeoChatUsage(tenantId: string, inputTokens: number, outputTokens: number): Promise<void> {
+export async function recordAgentUsage(
+  tenantId: string,
+  agentSlug: AgentProfileSlug,
+  inputTokens: number,
+  outputTokens: number,
+): Promise<void> {
   await getPool().query(
     `INSERT INTO agent_usage_daily (tenant_id, agent_slug, usage_date, input_tokens, output_tokens, run_count)
-     VALUES ($1, 'ceo', CURRENT_DATE, $2, $3, 1)
+     VALUES ($1, $2, CURRENT_DATE, $3, $4, 1)
      ON CONFLICT (tenant_id, agent_slug, usage_date) DO UPDATE SET
        input_tokens = agent_usage_daily.input_tokens + EXCLUDED.input_tokens,
        output_tokens = agent_usage_daily.output_tokens + EXCLUDED.output_tokens,
        run_count = agent_usage_daily.run_count + EXCLUDED.run_count`,
-    [tenantId, inputTokens, outputTokens],
+    [tenantId, agentSlug, inputTokens, outputTokens],
   );
 }
 

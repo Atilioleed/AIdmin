@@ -10,6 +10,7 @@ export const NAV_ITEMS = [
   { href: '/dashboard/negocio', label: 'Negocio', icon: 'building' as const },
   { href: '/dashboard/sitio', label: 'Sitio web', icon: 'globe' as const },
   { href: '/dashboard/inventario', label: 'Inventario', icon: 'box' as const },
+  { href: '/dashboard/pedidos', label: 'Pedidos', icon: 'receipt' as const },
   { href: '/dashboard/redes', label: 'Redes', icon: 'share' as const },
   { href: '/dashboard/approvals', label: 'Aprobaciones', icon: 'check' as const },
   { href: '/dashboard/content', label: 'Contenido', icon: 'megaphone' as const },
