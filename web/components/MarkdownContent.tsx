@@ -7,7 +7,8 @@ export function stripMarkdown(text: string): string {
     .replace(/\*\*(.+?)\*\*/g, '$1')
     .replace(/\*(.+?)\*/g, '$1')
     .replace(/`(.+?)`/g, '$1')
-    .replace(/^[-*]\s+/gm, '')
+    .replace(/^[-*•–]\s+/gm, '')
+    .replace(/^\d+[.)]\s+/gm, '')
     .replace(/^---+$/gm, '')
     .replace(/\n+/g, ' ')
     .trim();
@@ -86,27 +87,28 @@ export function MarkdownContent({ text, compact = false }: { text: string; compa
       continue;
     }
 
-    const h2 = /^##\s+(.+)/.exec(trimmed);
-    if (h2) {
-      blocks.push(
-        <h2
-          key={key++}
-          className={`font-display font-semibold text-[var(--color-ink)] first:mt-0 ${compact ? 'mt-3 text-base' : 'mt-6 text-xl'}`}
-        >
-          {renderInline(h2[1], `h2-${key}`)}
-        </h2>,
-      );
-      i += 1;
-      continue;
-    }
-
-    const h3 = /^###\s+(.+)/.exec(trimmed);
-    if (h3) {
-      blocks.push(
-        <h3 key={key++} className={`font-semibold text-[var(--color-ink)] ${compact ? 'mt-3 text-sm' : 'mt-5 text-base'}`}>
-          {renderInline(h3[1], `h3-${key}`)}
-        </h3>,
-      );
+    // Cualquier nivel de heading (# a ######) - los agentes no siempre se limitan a
+    // ##/### aunque sea lo que sugiere el ejemplo del CEO. # y ## se tratan como
+    // titulo principal, ###+ como sub-titulo - asi nunca queda un "#" crudo en pantalla.
+    const heading = /^(#{1,6})\s+(.+)/.exec(trimmed);
+    if (heading) {
+      const level = heading[1].length;
+      if (level <= 2) {
+        blocks.push(
+          <h2
+            key={key++}
+            className={`font-display font-semibold text-[var(--color-ink)] first:mt-0 ${compact ? 'mt-3 text-base' : 'mt-6 text-xl'}`}
+          >
+            {renderInline(heading[2], `h2-${key}`)}
+          </h2>,
+        );
+      } else {
+        blocks.push(
+          <h3 key={key++} className={`font-semibold text-[var(--color-ink)] ${compact ? 'mt-3 text-sm' : 'mt-5 text-base'}`}>
+            {renderInline(heading[2], `h3-${key}`)}
+          </h3>,
+        );
+      }
       i += 1;
       continue;
     }
@@ -125,10 +127,10 @@ export function MarkdownContent({ text, compact = false }: { text: string; compa
       continue;
     }
 
-    if (/^[-*]\s+/.test(trimmed)) {
+    if (/^[-*•–]\s+/.test(trimmed)) {
       const items: string[] = [];
-      while (i < lines.length && /^[-*]\s+/.test(lines[i].trim())) {
-        items.push(lines[i].trim().replace(/^[-*]\s+/, ''));
+      while (i < lines.length && /^[-*•–]\s+/.test(lines[i].trim())) {
+        items.push(lines[i].trim().replace(/^[-*•–]\s+/, ''));
         i += 1;
       }
       blocks.push(
@@ -144,10 +146,10 @@ export function MarkdownContent({ text, compact = false }: { text: string; compa
       continue;
     }
 
-    if (/^\d+\.\s+/.test(trimmed)) {
+    if (/^\d+[.)]\s+/.test(trimmed)) {
       const items: string[] = [];
-      while (i < lines.length && /^\d+\.\s+/.test(lines[i].trim())) {
-        items.push(lines[i].trim().replace(/^\d+\.\s+/, ''));
+      while (i < lines.length && /^\d+[.)]\s+/.test(lines[i].trim())) {
+        items.push(lines[i].trim().replace(/^\d+[.)]\s+/, ''));
         i += 1;
       }
       blocks.push(
@@ -170,7 +172,7 @@ export function MarkdownContent({ text, compact = false }: { text: string; compa
     while (
       i < lines.length &&
       lines[i].trim() !== '' &&
-      !/^(##|###|[-*]\s|\d+\.\s|---+$)/.test(lines[i].trim()) &&
+      !/^(#{1,6}\s|[-*•–]\s|\d+[.)]\s|---+$)/.test(lines[i].trim()) &&
       !isStandaloneBold(lines[i].trim())
     ) {
       paraLines.push(lines[i].trim());

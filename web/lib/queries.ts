@@ -108,15 +108,27 @@ export async function getLatestReport(tenantId: string, slug: string): Promise<R
     : null;
 }
 
-export async function listReports(tenantId: string, limit = 30, onDate?: string): Promise<ReportRow[]> {
+export interface ReportDateFilter {
+  /** Filtro por un dia exacto (selector de fecha existente). */
+  onDate?: string;
+  /** Filtro por rango (usado por "ultima semana" / "ultimo mes"), inclusive de ambos extremos. */
+  from?: string;
+  to?: string;
+}
+
+export async function listReports(tenantId: string, limit = 30, filter: ReportDateFilter = {}): Promise<ReportRow[]> {
+  const { onDate, from, to } = filter;
   const result = await getPool().query(
     `SELECT r.id, a.slug, a.name AS agent_name, r.summary, r.created_at
      FROM reports r
      JOIN agents a ON a.id = r.agent_id
-     WHERE a.tenant_id = $1 AND ($3::date IS NULL OR r.created_at::date = $3::date)
+     WHERE a.tenant_id = $1
+       AND ($3::date IS NULL OR r.created_at::date = $3::date)
+       AND ($4::date IS NULL OR r.created_at::date >= $4::date)
+       AND ($5::date IS NULL OR r.created_at::date <= $5::date)
      ORDER BY r.created_at DESC
      LIMIT $2`,
-    [tenantId, limit, onDate ?? null],
+    [tenantId, limit, onDate ?? null, from ?? null, to ?? null],
   );
   return (
     result.rows as Array<{ id: string; slug: string; agent_name: string; summary: string; created_at: Date }>
