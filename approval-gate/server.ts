@@ -89,7 +89,7 @@ export function startApprovalGateServer(port: number): Server {
   return server;
 }
 
-const isMainModule = process.argv[1]?.endsWith('server.ts') ?? false;
+const isMainModule = /server\.(ts|js)$/.test(process.argv[1] ?? '');
 if (isMainModule) {
   const port = Number(process.env.APPROVAL_GATE_PORT ?? 4000);
   startApprovalGateServer(port);

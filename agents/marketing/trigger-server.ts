@@ -44,7 +44,7 @@ export function startMarketingTriggerServer(port: number): Server {
   return server;
 }
 
-const isMainModule = process.argv[1]?.endsWith('trigger-server.ts') ?? false;
+const isMainModule = /trigger-server\.(ts|js)$/.test(process.argv[1] ?? '');
 if (isMainModule) {
   const port = Number(process.env.MARKETING_TRIGGER_PORT ?? 4105);
   startMarketingTriggerServer(port);

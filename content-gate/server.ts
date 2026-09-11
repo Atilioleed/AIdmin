@@ -89,7 +89,7 @@ export function startContentGateServer(port: number): Server {
   return server;
 }
 
-const isMainModule = process.argv[1]?.endsWith('server.ts') ?? false;
+const isMainModule = /server\.(ts|js)$/.test(process.argv[1] ?? '');
 if (isMainModule) {
   const port = Number(process.env.CONTENT_GATE_PORT ?? 4001);
   startContentGateServer(port);

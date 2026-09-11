@@ -17,6 +17,6 @@
     "declaration": false,
     "sourceMap": true
   },
-  "include": ["agents/**/*.ts", "approval-gate/**/*.ts", "content-gate/**/*.ts", "db/**/*.ts"],
+  "include": ["agents/**/*.ts", "approval-gate/**/*.ts", "content-gate/**/*.ts", "db/**/*.ts", "deploy/fly/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

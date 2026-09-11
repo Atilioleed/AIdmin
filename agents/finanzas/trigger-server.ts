@@ -44,7 +44,7 @@ export function startFinanzasTriggerServer(port: number): Server {
   return server;
 }
 
-const isMainModule = process.argv[1]?.endsWith('trigger-server.ts') ?? false;
+const isMainModule = /trigger-server\.(ts|js)$/.test(process.argv[1] ?? '');
 if (isMainModule) {
   const port = Number(process.env.FINANZAS_TRIGGER_PORT ?? 4101);
   startFinanzasTriggerServer(port);

@@ -44,7 +44,7 @@ export function startLegalTriggerServer(port: number): Server {
   return server;
 }
 
-const isMainModule = process.argv[1]?.endsWith('trigger-server.ts') ?? false;
+const isMainModule = /trigger-server\.(ts|js)$/.test(process.argv[1] ?? '');
 if (isMainModule) {
   const port = Number(process.env.LEGAL_TRIGGER_PORT ?? 4102);
   startLegalTriggerServer(port);
