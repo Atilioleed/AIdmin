@@ -13,10 +13,13 @@ export default async function SitioPage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Tu sitio web</h1>
-        <p className="text-sm text-neutral-500">
-          Elige una plantilla, personaliza colores e información básica, y publica.
-          Un diseño más a medida tiene un costo aparte — hablemos si lo necesitas.
+        <h1 className="font-display text-3xl font-semibold text-[var(--color-ink)]">
+          Tu sitio <span className="text-gradient-warm">web</span>
+        </h1>
+        <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-soft)]">
+          Elige una plantilla — la miniatura es una vista real, no un dibujo — personaliza colores
+          e información básica, y publica. Un diseño más a medida tiene un costo aparte — hablemos
+          si lo necesitas.
         </p>
       </div>
 

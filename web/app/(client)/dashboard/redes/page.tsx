@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentTenant } from '../../../../lib/tenant';
 import { getSocialLinks } from '../../../../lib/social-links';
 import { SocialLinksForm } from './SocialLinksForm';
+import { MetricoolConnect } from './MetricoolConnect';
 
 export default async function RedesPage() {
   const tenant = await getCurrentTenant();
@@ -12,13 +13,14 @@ export default async function RedesPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Redes sociales</h1>
-        <p className="text-sm text-neutral-500">
-          Tu Gerente de Marketing usa esto como referencia para su trabajo. Todavía no
-          es una conexión con credenciales reales (eso viene más adelante) — con el
-          handle o link alcanza.
+        <h1 className="font-display text-3xl font-semibold text-[var(--color-ink)]">Redes sociales</h1>
+        <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-soft)]">
+          Tu Gerente de Marketing usa esto como referencia. Conecta Metricool para que además
+          trabaje con datos y calendario reales, no solo estos enlaces.
         </p>
       </div>
+
+      <MetricoolConnect isConnected={links.isMetricoolConnected} connectedAt={links.metricoolConnectedAt} />
 
       <SocialLinksForm links={links} />
     </div>

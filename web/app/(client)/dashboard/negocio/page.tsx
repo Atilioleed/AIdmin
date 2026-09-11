@@ -12,11 +12,13 @@ export default async function NegocioPage() {
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Contexto de tu negocio</h1>
-        <p className="text-sm text-neutral-500">
-          Esto lo lee tu comité completo (los 6 gerentes) antes de trabajar — son las
-          mismas preguntas que haría un fondo antes de invertir. Mientras más completo
-          esté, mejor trabajan por ti.
+        <h1 className="font-display text-3xl font-semibold text-[var(--color-ink)]">
+          Contexto de tu <span className="text-gradient-warm">negocio</span>
+        </h1>
+        <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-soft)]">
+          Esto lo lee tu comité completo (los 6 gerentes) antes de trabajar — son las mismas
+          preguntas que haría un fondo antes de invertir. Mientras más completo esté, mejor
+          trabajan por ti.
         </p>
       </div>
 

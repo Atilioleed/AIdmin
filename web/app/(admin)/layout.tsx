@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation';
 import { UserButton } from '@clerk/nextjs';
 import { isCurrentUserPlatformAdmin } from '../../lib/tenant';
 import { Logo } from '../../components/Logo';
+import { AnimatedMain } from '../../components/AnimatedMain';
 import { AdminNav } from './AdminNav';
-import { AnimatedMain } from './AnimatedMain';
 
 export const NAV_ITEMS = [
   { href: '/admin', label: 'Resumen', icon: 'home' as const },

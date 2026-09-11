@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { getCurrentTenant } from '../../../../lib/tenant';
-import { createProduct, setProductActive } from '../../../../lib/products';
+import { createProduct, setProductActive, setCoverPhoto } from '../../../../lib/products';
 import { getUploadsStorage, validateUpload } from '../../../../lib/uploads-storage';
 
 export async function createProductAction(formData: FormData): Promise<{ error?: string }> {
@@ -12,11 +12,16 @@ export async function createProductAction(formData: FormData): Promise<{ error?:
   const name = String(formData.get('name') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim() || null;
   const priceClp = Number(formData.get('priceClp'));
+  const costPriceRaw = String(formData.get('costPriceClp') ?? '').trim();
+  const costPriceClp = costPriceRaw ? Number(costPriceRaw) : null;
   const stockQuantity = Number(formData.get('stockQuantity') ?? 0);
   const safetyStockThreshold = Number(formData.get('safetyStockThreshold') ?? 0);
 
   if (!name) return { error: 'El nombre es obligatorio.' };
   if (!Number.isFinite(priceClp) || priceClp < 0) return { error: 'Precio invalido.' };
+  if (costPriceClp !== null && (!Number.isFinite(costPriceClp) || costPriceClp < 0)) {
+    return { error: 'Precio de costo invalido.' };
+  }
   if (!Number.isFinite(stockQuantity) || stockQuantity < 0) return { error: 'Stock invalido.' };
   if (!Number.isFinite(safetyStockThreshold) || safetyStockThreshold < 0) {
     return { error: 'Stock de seguridad invalido.' };
@@ -36,9 +41,11 @@ export async function createProductAction(formData: FormData): Promise<{ error?:
     name,
     description,
     priceClp: Math.round(priceClp),
+    costPriceClp: costPriceClp !== null ? Math.round(costPriceClp) : null,
     stockQuantity: Math.round(stockQuantity),
     safetyStockThreshold: Math.round(safetyStockThreshold),
     photoStoragePaths,
+    coverPhotoIndex: 0,
   });
 
   revalidatePath('/dashboard/inventario');
@@ -51,4 +58,12 @@ export async function toggleProductActiveAction(productId: string, isActive: boo
   if (!tenant) return;
   await setProductActive(tenant.id, productId, isActive);
   revalidatePath('/dashboard/inventario');
+}
+
+export async function setCoverPhotoAction(productId: string, coverPhotoIndex: number): Promise<void> {
+  const tenant = await getCurrentTenant();
+  if (!tenant) return;
+  await setCoverPhoto(tenant.id, productId, coverPhotoIndex);
+  revalidatePath('/dashboard/inventario');
+  revalidatePath('/dashboard/sitio');
 }

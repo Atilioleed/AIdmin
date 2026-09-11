@@ -11,9 +11,12 @@ export function ToggleActiveButton({ productId, isActive }: { productId: string;
       type="button"
       disabled={isPending}
       onClick={() => startTransition(() => toggleProductActiveAction(productId, !isActive))}
-      className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium disabled:opacity-50 ${
-        isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-neutral-100 text-neutral-500'
-      }`}
+      className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold disabled:opacity-50"
+      style={
+        isActive
+          ? { background: 'var(--color-good-bg)', color: 'var(--color-good)' }
+          : { background: 'var(--color-surface-sunken)', color: 'var(--color-ink-faint)' }
+      }
     >
       {isActive ? 'Activo' : 'Inactivo'}
     </button>

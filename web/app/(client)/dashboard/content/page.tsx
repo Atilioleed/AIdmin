@@ -10,21 +10,23 @@ export default async function ContentPage() {
   const reviews = await listPendingContentReviews(tenant.id);
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-lg font-semibold text-neutral-900">Contenido pendiente de revisión</h1>
-        <p className="text-sm text-neutral-500">
-          Posts orgánicos que Marketing dejó listos. Ninguno se publica hasta que lo
-          apruebes aquí (Metricool real aún no está conectado, así que por ahora esto
-          deja constancia de la aprobación).
+        <h1 className="font-display text-3xl font-semibold text-[var(--color-ink)]">
+          Contenido <span className="text-gradient-warm">pendiente</span>
+        </h1>
+        <p className="mt-1 max-w-2xl text-sm text-[var(--color-ink-soft)]">
+          Posts que Marketing dejó listos, con día, hora y red social. Nada se publica hasta que lo
+          apruebes aquí.
         </p>
       </div>
+
       {reviews.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-neutral-300 bg-white p-6 text-sm text-neutral-500">
-          No hay contenido pendiente ahora mismo.
-        </p>
+        <div className="card p-8 text-center">
+          <p className="text-sm text-[var(--color-ink-faint)]">No hay contenido pendiente ahora mismo.</p>
+        </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           {reviews.map((r) => (
             <ContentCard
               key={r.id}

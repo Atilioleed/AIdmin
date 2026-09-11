@@ -9,6 +9,8 @@ export interface SocialLinks {
   youtube: string;
   website: string;
   notes: string;
+  isMetricoolConnected: boolean;
+  metricoolConnectedAt: Date | null;
   updatedAt: Date | null;
   updatedBy: string | null;
 }
@@ -22,6 +24,8 @@ interface SocialLinksRow {
   youtube: string | null;
   website: string | null;
   notes: string | null;
+  metricool_api_key: string | null;
+  metricool_connected_at: Date | null;
   updated_at: Date;
   updated_by: string | null;
 }
@@ -35,6 +39,8 @@ const EMPTY: SocialLinks = {
   youtube: '',
   website: '',
   notes: '',
+  isMetricoolConnected: false,
+  metricoolConnectedAt: null,
   updatedAt: null,
   updatedBy: null,
 };
@@ -49,15 +55,20 @@ function toSocialLinks(row: SocialLinksRow): SocialLinks {
     youtube: row.youtube ?? '',
     website: row.website ?? '',
     notes: row.notes ?? '',
+    isMetricoolConnected: Boolean(row.metricool_api_key),
+    metricoolConnectedAt: row.metricool_connected_at,
     updatedAt: row.updated_at,
     updatedBy: row.updated_by,
   };
 }
 
+const SELECT_COLUMNS =
+  'instagram, facebook, tiktok, linkedin, x_twitter, youtube, website, notes, ' +
+  'metricool_api_key, metricool_connected_at, updated_at, updated_by';
+
 export async function getSocialLinks(tenantId: string): Promise<SocialLinks> {
   const result = await getPool().query<SocialLinksRow>(
-    `SELECT instagram, facebook, tiktok, linkedin, x_twitter, youtube, website, notes, updated_at, updated_by
-     FROM social_links WHERE tenant_id = $1`,
+    `SELECT ${SELECT_COLUMNS} FROM social_links WHERE tenant_id = $1`,
     [tenantId],
   );
   const row = result.rows[0];
@@ -103,5 +114,29 @@ export async function upsertSocialLinks(tenantId: string, input: SocialLinksInpu
       input.notes,
       input.updatedBy,
     ],
+  );
+}
+
+/**
+ * Guarda la API key de Metricool de esta pyme (fila debe existir - se crea con un
+ * upsert de campos vacios si hace falta). Nunca se vuelve a leer el valor real hacia
+ * la UI, solo si esta seteada o no (ver toSocialLinks/isMetricoolConnected).
+ */
+export async function connectMetricool(tenantId: string, apiKey: string, updatedBy: string): Promise<void> {
+  await getPool().query(
+    `INSERT INTO social_links (tenant_id, metricool_api_key, metricool_connected_at, updated_by)
+     VALUES ($1, $2, now(), $3)
+     ON CONFLICT (tenant_id) DO UPDATE SET
+       metricool_api_key = EXCLUDED.metricool_api_key,
+       metricool_connected_at = now(),
+       updated_by = EXCLUDED.updated_by`,
+    [tenantId, apiKey, updatedBy],
+  );
+}
+
+export async function disconnectMetricool(tenantId: string): Promise<void> {
+  await getPool().query(
+    `UPDATE social_links SET metricool_api_key = NULL, metricool_connected_at = NULL WHERE tenant_id = $1`,
+    [tenantId],
   );
 }

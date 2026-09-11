@@ -3,6 +3,10 @@
 import { useRef, useState, useTransition } from 'react';
 import { uploadClientFileAction } from './actions';
 
+const inputClass =
+  'w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-3 py-2 text-sm text-[var(--color-ink)] outline-none focus:border-transparent focus:ring-2 focus:ring-[var(--color-violet)]/40';
+const labelClass = 'mb-1.5 block text-xs font-semibold text-[var(--color-ink-soft)]';
+
 const AGENT_OPTIONS = [
   { value: 'all', label: 'Todos los gerentes' },
   { value: 'desarrollo', label: 'Desarrollo (Mauricio)' },
@@ -31,14 +35,14 @@ export function UploadForm() {
   }
 
   return (
-    <form ref={formRef} action={handleSubmit} className="flex flex-col gap-3 rounded-lg border border-neutral-200 bg-white p-4">
+    <form ref={formRef} action={handleSubmit} className="card flex flex-col gap-4 p-5">
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-600">Archivo (foto, PDF, doc — máx. 10MB)</label>
+        <label className={labelClass}>Archivo (foto, PDF, doc — máx. 10MB)</label>
         <input type="file" name="file" required className="w-full text-sm" />
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-600">Para qué gerente</label>
-        <select name="agentSlug" defaultValue="all" className="w-full rounded border border-neutral-300 px-2 py-1.5 text-sm">
+        <label className={labelClass}>Para qué gerente</label>
+        <select name="agentSlug" defaultValue="all" className={inputClass}>
           {AGENT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -47,19 +51,15 @@ export function UploadForm() {
         </select>
       </div>
       <div>
-        <label className="mb-1 block text-xs font-medium text-neutral-600">Descripción / contexto</label>
-        <textarea
-          name="caption"
-          rows={2}
-          placeholder="Ej: foto del local para el nuevo post de Instagram"
-          className="w-full rounded border border-neutral-300 px-2 py-1.5 text-sm"
-        />
+        <label className={labelClass}>Descripción / contexto</label>
+        <textarea name="caption" rows={2} placeholder="Ej: foto del local para el nuevo post de Instagram" className={inputClass} />
       </div>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs font-medium text-[var(--color-critical)]">{error}</p>}
       <button
         type="submit"
         disabled={isPending}
-        className="self-start rounded bg-neutral-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-neutral-700 disabled:opacity-50"
+        className="self-start rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-glow)] disabled:opacity-50"
+        style={{ background: 'var(--gradient-brand)' }}
       >
         {isPending ? 'Subiendo…' : 'Subir'}
       </button>

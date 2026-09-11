@@ -35,28 +35,30 @@ export async function OnboardingChecklist({ tenantId }: { tenantId: string }) {
   if (doneCount === steps.length) return null;
 
   return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4">
+    <div className="card p-5">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-semibold text-neutral-900">Configura tu pyme</p>
-        <span className="text-xs text-neutral-400">
+        <p className="font-display text-sm font-semibold text-[var(--color-ink)]">Configura tu pyme</p>
+        <span className="rounded-full bg-[var(--color-surface-sunken)] px-2 py-0.5 text-xs font-semibold text-[var(--color-ink-faint)]">
           {doneCount}/{steps.length}
         </span>
       </div>
       <ul className="flex flex-col gap-2">
         {steps.map((step) => (
           <li key={step.href}>
-            <Link
-              href={step.href}
-              className="flex items-center gap-2 text-sm text-neutral-700 hover:text-neutral-900"
-            >
+            <Link href={step.href} className="group flex items-center gap-2.5 text-sm">
               <span
-                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] ${
-                  step.done ? 'bg-emerald-500 text-white' : 'border border-neutral-300 text-transparent'
-                }`}
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] text-white"
+                style={
+                  step.done
+                    ? { background: 'var(--gradient-brand)' }
+                    : { border: '1.5px solid var(--color-border)', color: 'transparent' }
+                }
               >
                 ✓
               </span>
-              <span className={step.done ? 'text-neutral-400 line-through' : ''}>{step.label}</span>
+              <span className={step.done ? 'text-[var(--color-ink-faint)] line-through' : 'text-[var(--color-ink-soft)] group-hover:text-[var(--color-violet)]'}>
+                {step.label}
+              </span>
             </Link>
           </li>
         ))}

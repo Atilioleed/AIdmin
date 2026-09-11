@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { AgentAvatar } from '../../../../components/AgentAvatar';
+import type { AgentKey } from '../../../../components/marketing/AgentIcon';
+import { NetworkBadge } from './NetworkBadge';
 import { approveContentAction, rejectContentAction } from './actions';
 
 export function ContentCard({
@@ -33,47 +36,62 @@ export function ContentCard({
     });
   }
 
+  const when = scheduledFor ? new Date(scheduledFor) : null;
+
   return (
-    <article className="rounded-lg border border-neutral-200 bg-white p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">
-          {channel}
-        </span>
-        <span className="text-xs text-neutral-400">
-          {agentSlug} · {new Date(requestedAt).toLocaleString('es-CL')}
-        </span>
+    <article className="card overflow-hidden p-0">
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--color-border-soft)] px-5 py-3">
+        <div className="flex items-center gap-2.5">
+          <AgentAvatar agent={agentSlug as AgentKey} size={32} animated={false} />
+          <NetworkBadge channel={channel} />
+        </div>
+        {when ? (
+          <div className="text-right text-xs text-[var(--color-ink-soft)]">
+            <p className="font-semibold text-[var(--color-ink)]">
+              {when.toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })}
+            </p>
+            <p>{when.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}</p>
+          </div>
+        ) : (
+          <span className="text-xs text-[var(--color-ink-faint)]">Sin fecha programada</span>
+        )}
       </div>
-      <p className="mb-3 whitespace-pre-wrap text-sm text-neutral-800">{contentText}</p>
-      {scheduledFor && (
-        <p className="mb-3 text-xs text-neutral-500">
-          Programado para {new Date(scheduledFor).toLocaleString('es-CL')}
+
+      <div className="p-5">
+        <div className="rounded-xl border border-[var(--color-border-soft)] bg-[var(--color-surface-sunken)] p-4">
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--color-ink)]">{contentText}</p>
+        </div>
+        <p className="mt-2 text-xs text-[var(--color-ink-faint)]">
+          Propuesto el {new Date(requestedAt).toLocaleString('es-CL')}
         </p>
-      )}
-      <input
-        type="text"
-        placeholder="Nota (opcional)"
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        className="mb-2 w-full rounded border border-neutral-300 px-2 py-1 text-sm"
-      />
-      {error && <p className="mb-2 text-xs text-red-600">{error}</p>}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => handle(approveContentAction)}
-          className="rounded bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-        >
-          Aprobar
-        </button>
-        <button
-          type="button"
-          disabled={isPending}
-          onClick={() => handle(rejectContentAction)}
-          className="rounded bg-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-300 disabled:opacity-50"
-        >
-          Rechazar
-        </button>
+
+        <input
+          type="text"
+          placeholder="Nota (opcional)"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className="mt-3 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-3 py-1.5 text-sm text-[var(--color-ink)] outline-none focus:border-transparent focus:ring-2 focus:ring-[var(--color-violet)]/40"
+        />
+        {error && <p className="mt-2 text-xs font-medium text-[var(--color-critical)]">{error}</p>}
+        <div className="mt-3 flex gap-2">
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => handle(approveContentAction)}
+            className="rounded-full px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+            style={{ background: 'var(--color-good)' }}
+          >
+            Aprobar
+          </button>
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => handle(rejectContentAction)}
+            className="rounded-full border border-[var(--color-border)] px-4 py-1.5 text-sm font-semibold text-[var(--color-ink-soft)] hover:border-[var(--color-critical)] hover:text-[var(--color-critical)] disabled:opacity-50"
+          >
+            Rechazar
+          </button>
+        </div>
       </div>
     </article>
   );

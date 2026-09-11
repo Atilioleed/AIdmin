@@ -349,3 +349,32 @@ CREATE TRIGGER trg_products_updated_at
   BEFORE UPDATE ON products
   FOR EACH ROW
   EXECUTE FUNCTION set_updated_at();
+
+-- Costo (lo que le cuesta al negocio) y foto de portada, ademas del precio de venta
+-- y el arreglo de fotos que ya existia. cover_photo_index es un indice dentro de
+-- photo_storage_paths (0 por defecto = la primera foto subida).
+ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price_clp INTEGER CHECK (cost_price_clp >= 0);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS cover_photo_index INTEGER NOT NULL DEFAULT 0;
+
+-- Historial de chat en vivo con el CEO (panel cliente, /dashboard/chat). Una fila
+-- por mensaje, de cualquiera de los dos lados. No pasa por Agent.run() (ese loop
+-- vive en el paquete agents/, separado de web/) - es una conversacion mas liviana,
+-- con contexto real (perfil del CEO, negocio, reportes recientes) pero sin tools.
+-- Cuenta contra el mismo tope diario de tokens del CEO (agent_usage_daily).
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant')),
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_messages_tenant_id ON chat_messages (tenant_id, created_at);
+
+-- Conexion real (API key propia de cada pyme) para que Marketing deje de usar datos
+-- mock y trabaje con metricas/calendario reales de Metricool. Se guarda por tenant
+-- (cada pyme conecta su propia cuenta). El campo nunca se re-renderiza en el
+-- formulario una vez guardado (solo un estado "conectado"), para no exponerlo en
+-- el HTML de la pagina.
+ALTER TABLE social_links ADD COLUMN IF NOT EXISTS metricool_api_key TEXT;
+ALTER TABLE social_links ADD COLUMN IF NOT EXISTS metricool_connected_at TIMESTAMPTZ;

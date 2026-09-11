@@ -108,15 +108,15 @@ export async function getLatestReport(tenantId: string, slug: string): Promise<R
     : null;
 }
 
-export async function listReports(tenantId: string, limit = 30): Promise<ReportRow[]> {
+export async function listReports(tenantId: string, limit = 30, onDate?: string): Promise<ReportRow[]> {
   const result = await getPool().query(
     `SELECT r.id, a.slug, a.name AS agent_name, r.summary, r.created_at
      FROM reports r
      JOIN agents a ON a.id = r.agent_id
-     WHERE a.tenant_id = $1
+     WHERE a.tenant_id = $1 AND ($3::date IS NULL OR r.created_at::date = $3::date)
      ORDER BY r.created_at DESC
      LIMIT $2`,
-    [tenantId, limit],
+    [tenantId, limit, onDate ?? null],
   );
   return (
     result.rows as Array<{ id: string; slug: string; agent_name: string; summary: string; created_at: Date }>
@@ -127,6 +127,36 @@ export async function listReports(tenantId: string, limit = 30): Promise<ReportR
     summary: row.summary,
     createdAt: row.created_at,
   }));
+}
+
+/** Fechas (una por dia, mas reciente primero) que tienen al menos un reporte - para el selector de fecha del historial. */
+export async function listReportDates(tenantId: string, limit = 60): Promise<string[]> {
+  const result = await getPool().query<{ day: string }>(
+    `SELECT DISTINCT r.created_at::date::text AS day
+     FROM reports r
+     JOIN agents a ON a.id = r.agent_id
+     WHERE a.tenant_id = $1
+     ORDER BY day DESC
+     LIMIT $2`,
+    [tenantId, limit],
+  );
+  return result.rows.map((r) => r.day);
+}
+
+export async function getReportById(tenantId: string, reportId: string): Promise<ReportRow | null> {
+  const result = await getPool().query(
+    `SELECT r.id, a.slug, a.name AS agent_name, r.summary, r.created_at
+     FROM reports r
+     JOIN agents a ON a.id = r.agent_id
+     WHERE a.tenant_id = $1 AND r.id = $2`,
+    [tenantId, reportId],
+  );
+  const row = result.rows[0] as
+    | { id: string; slug: string; agent_name: string; summary: string; created_at: Date }
+    | undefined;
+  return row
+    ? { id: row.id, slug: row.slug, agentName: row.agent_name, summary: row.summary, createdAt: row.created_at }
+    : null;
 }
 
 export async function listPendingApprovals(tenantId: string): Promise<PendingApprovalRow[]> {

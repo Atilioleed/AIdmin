@@ -39,7 +39,7 @@ export async function buildTenantSiteContent(
             name: p.name,
             description: p.description,
             priceClp: p.priceClp,
-            photoUrl: p.photoStoragePaths[0] ? `/${p.photoStoragePaths[0]}` : null,
+            photoUrl: p.photoStoragePaths[p.coverPhotoIndex] ? `/${p.photoStoragePaths[p.coverPhotoIndex]}` : null,
           })),
     contact: {
       instagram: socialLinks.instagram,

@@ -10,15 +10,18 @@ const ACTION_TYPE_LABEL: Record<string, string> = {
   paid_campaign_launch: 'Campaña paga',
 };
 
+function formatPayloadValue(value: unknown): string {
+  if (typeof value === 'number') return value.toLocaleString('es-CL');
+  return String(value);
+}
+
 export function ApprovalCard({
   id,
-  agentSlug,
   actionType,
   payload,
   requestedAt,
 }: {
   id: string;
-  agentSlug: string;
   actionType: string;
   payload: Record<string, unknown>;
   requestedAt: string;
@@ -39,32 +42,41 @@ export function ApprovalCard({
   }
 
   return (
-    <article className="rounded-lg border border-neutral-200 bg-white p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+    <article className="card p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <span
+          className="rounded-full px-2.5 py-1 text-xs font-semibold"
+          style={{ background: 'var(--color-warn-bg)', color: 'var(--color-warn)' }}
+        >
           {ACTION_TYPE_LABEL[actionType] ?? actionType}
         </span>
-        <span className="text-xs text-neutral-400">
-          {agentSlug} · {new Date(requestedAt).toLocaleString('es-CL')}
-        </span>
+        <span className="text-xs text-[var(--color-ink-faint)]">{new Date(requestedAt).toLocaleString('es-CL')}</span>
       </div>
-      <pre className="mb-3 overflow-x-auto rounded bg-neutral-50 p-3 text-xs text-neutral-700">
-        {JSON.stringify(payload, null, 2)}
-      </pre>
+
+      <dl className="mb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-lg bg-[var(--color-surface-sunken)] p-3 text-sm sm:grid-cols-3">
+        {Object.entries(payload).map(([key, value]) => (
+          <div key={key}>
+            <dt className="text-[11px] uppercase tracking-wide text-[var(--color-ink-faint)]">{key}</dt>
+            <dd className="text-[var(--color-ink)]">{formatPayloadValue(value)}</dd>
+          </div>
+        ))}
+      </dl>
+
       <input
         type="text"
         placeholder="Nota (opcional)"
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
-        className="mb-2 w-full rounded border border-neutral-300 px-2 py-1 text-sm"
+        className="mb-3 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-3 py-1.5 text-sm text-[var(--color-ink)] outline-none focus:border-transparent focus:ring-2 focus:ring-[var(--color-violet)]/40"
       />
-      {error && <p className="mb-2 text-xs text-red-600">{error}</p>}
+      {error && <p className="mb-2 text-xs font-medium text-[var(--color-critical)]">{error}</p>}
       <div className="flex gap-2">
         <button
           type="button"
           disabled={isPending}
           onClick={() => handle(approveApprovalAction)}
-          className="rounded bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+          className="rounded-full px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
+          style={{ background: 'var(--color-good)' }}
         >
           Aprobar
         </button>
@@ -72,7 +84,7 @@ export function ApprovalCard({
           type="button"
           disabled={isPending}
           onClick={() => handle(rejectApprovalAction)}
-          className="rounded bg-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-800 hover:bg-neutral-300 disabled:opacity-50"
+          className="rounded-full border border-[var(--color-border)] px-4 py-1.5 text-sm font-semibold text-[var(--color-ink-soft)] hover:border-[var(--color-critical)] hover:text-[var(--color-critical)] disabled:opacity-50"
         >
           Rechazar
         </button>
