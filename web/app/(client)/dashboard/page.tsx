@@ -5,6 +5,8 @@ import { getLatestReport, listAgentActivity } from '../../../lib/queries';
 import { OnboardingChecklist } from './OnboardingChecklist';
 import { AgentNetworkVisual } from '../../../components/AgentNetworkVisual';
 import { AgentAvatar } from '../../../components/AgentAvatar';
+import { Logo } from '../../../components/Logo';
+import { MarkdownContent } from '../../../components/MarkdownContent';
 import { AGENTS } from '../../../components/marketing/AgentIcon';
 import type { AgentKey } from '../../../components/marketing/AgentIcon';
 
@@ -68,15 +70,16 @@ export default async function DashboardPage() {
             </p>
           </div>
         ) : (
-          <article className="card p-6">
-            <div className="mb-4 flex items-center gap-3">
-              <AgentAvatar agent="ceo" size={40} animated={false} />
-              <p className="text-xs text-[var(--color-ink-faint)]">
-                {new Date(pauta.createdAt).toLocaleString('es-CL')}
-              </p>
+          <article className="card overflow-hidden p-0">
+            <div className="flex items-center justify-between gap-4 px-6 py-4" style={{ background: 'var(--gradient-hero)' }}>
+              <Logo size="sm" muted />
+              <div className="flex items-center gap-2.5">
+                <AgentAvatar agent="ceo" size={36} animated={false} />
+                <p className="text-xs text-white/70">{new Date(pauta.createdAt).toLocaleString('es-CL')}</p>
+              </div>
             </div>
-            <div className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--color-ink-soft)]">
-              {pauta.summary}
+            <div className="px-6 py-6">
+              <MarkdownContent text={pauta.summary} />
             </div>
           </article>
         )}

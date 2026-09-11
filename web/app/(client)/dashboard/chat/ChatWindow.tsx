@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { AgentAvatar } from '../../../../components/AgentAvatar';
+import { MarkdownContent } from '../../../../components/MarkdownContent';
 import { sendChatMessageAction } from './actions';
 
 interface Message {
@@ -59,12 +60,14 @@ export function ChatWindow({ initialMessages, ceoName }: { initialMessages: Mess
               <div key={m.id} className={`flex items-end gap-2.5 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 {m.role === 'assistant' && <AgentAvatar agent="ceo" size={32} animated={false} />}
                 <div
-                  className={`max-w-[75%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                    m.role === 'user' ? 'text-white' : 'bg-[var(--color-surface-sunken)] text-[var(--color-ink-soft)]'
+                  className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                    m.role === 'user'
+                      ? 'whitespace-pre-wrap text-white'
+                      : 'bg-[var(--color-surface-sunken)] text-[var(--color-ink-soft)]'
                   }`}
                   style={m.role === 'user' ? { background: 'var(--gradient-brand)' } : undefined}
                 >
-                  {m.content}
+                  {m.role === 'assistant' ? <MarkdownContent text={m.content} compact /> : m.content}
                 </div>
               </div>
             ))}

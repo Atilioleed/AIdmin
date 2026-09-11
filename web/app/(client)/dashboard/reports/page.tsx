@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentTenant } from '../../../../lib/tenant';
 import { listReports, listReportDates } from '../../../../lib/queries';
 import { AgentAvatar } from '../../../../components/AgentAvatar';
+import { stripMarkdown } from '../../../../components/MarkdownContent';
 import type { AgentKey } from '../../../../components/marketing/AgentIcon';
 
 function formatDateLabel(day: string): string {
@@ -88,7 +89,7 @@ export default async function ReportsPage({
                     minute: '2-digit',
                   })}
                 </p>
-                <p className="mt-1 truncate text-sm text-[var(--color-ink-soft)]">{r.summary}</p>
+                <p className="mt-1 truncate text-sm text-[var(--color-ink-soft)]">{stripMarkdown(r.summary)}</p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <Link
